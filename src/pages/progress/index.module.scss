@@ -1,0 +1,156 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.header {
+  padding: $spacing-lg $page-padding $spacing-xl;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: 0 0 $radius-xl $radius-xl;
+}
+
+.pageTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.pageSubtitle {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+  margin-bottom: $spacing-lg;
+}
+
+.filterTabs {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.filterTab {
+  padding: 16rpx 32rpx;
+  border-radius: $radius-button;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.filterTabActive {
+  background: $color-bg-card;
+
+  .filterTabText {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.filterTabText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+}
+
+.content {
+  padding: 0 $page-padding;
+  margin-top: -$spacing-md;
+  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-xl});
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.superviseCard {
+  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  border-left: 8rpx solid $color-error;
+}
+
+.superviseTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-error;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.superviseDesc {
+  font-size: $font-size-sm;
+  color: #B71C1C;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.superviseBtn {
+  height: 72rpx;
+  border-radius: $radius-button;
+  background: $color-error;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.superviseBtnText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}
+
+.countdown {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  background: rgba(245, 166, 35, 0.15);
+  border-radius: $radius-round;
+  margin-left: $spacing-sm;
+}
+
+.countdownText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-warning;
+}
+
+.emptyState {
+  padding: $spacing-xl * 2 $page-padding;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  line-height: $line-height-normal;
+}

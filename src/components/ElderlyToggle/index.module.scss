@@ -1,0 +1,42 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.toggleItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-button;
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.toggleActive {
+  background: rgba(255, 255, 255, 1);
+  border-color: $color-primary;
+
+  .toggleIcon,
+  .toggleText {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.toggleIcon {
+  font-size: $font-size-md;
+  color: $color-text-white;
+}
+
+.toggleText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+}

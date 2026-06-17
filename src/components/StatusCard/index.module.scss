@@ -1,0 +1,239 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: 0 1rpx 6rpx rgba(0, 0, 0, 0.06);
+  }
+}
+
+.cardHeader {
+  margin-bottom: $spacing-md;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  flex: 1;
+  @include text-ellipsis;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.statusDot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+}
+
+.statusPending { background: rgba(140, 140, 140, 0.1); }
+.dotPending { background: $color-pending; }
+
+.statusResolved { background: rgba(0, 168, 112, 0.1); }
+.dotResolved { background: $color-resolved; }
+
+.statusPartial { background: rgba(245, 166, 35, 0.1); }
+.dotPartial { background: $color-partial; }
+
+.statusUnresolved { background: rgba(229, 72, 77, 0.1); }
+.dotUnresolved { background: $color-unresolved; }
+
+.statusText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.statusPending .statusText { color: $color-pending; }
+.statusResolved .statusText { color: $color-resolved; }
+.statusPartial .statusText { color: $color-partial; }
+.statusUnresolved .statusText { color: $color-unresolved; }
+
+.matterName {
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
+
+.infoRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  padding: $spacing-md 0;
+  border-top: 1rpx solid $color-divider;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  min-width: 180rpx;
+}
+
+.infoLabel {
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  margin-bottom: 4rpx;
+}
+
+.infoValue {
+  color: $color-text-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.overtimeBanner {
+  margin-top: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background: rgba(229, 72, 77, 0.08);
+  border-radius: $radius-sm;
+  border-left: 6rpx solid $color-error;
+}
+
+.overtimeText {
+  color: $color-error;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.improvementSection {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(29, 111, 224, 0.05) 0%, rgba(74, 144, 255, 0.05) 100%);
+  border-radius: $radius-md;
+  border: 1rpx solid rgba(29, 111, 224, 0.15);
+}
+
+.improvementTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.improvementDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-sm;
+}
+
+.improvementMeta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.improvementMetaText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $spacing-md;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.time, .deadline {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.actionSection {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-lg;
+  border-top: 1rpx solid $color-divider;
+}
+
+.actionTip {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.actionButtons {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.actionBtn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+}
+
+.btnResolved {
+  background: linear-gradient(135deg, $color-success 0%, #00C48C 100%);
+}
+
+.btnPartial {
+  background: linear-gradient(135deg, $color-warning 0%, #FFB74D 100%);
+}
+
+.btnUnresolved {
+  background: linear-gradient(135deg, $color-error 0%, #EF5350 100%);
+}
+
+.btnText {
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.supplementBtn {
+  height: 72rpx;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(29, 111, 224, 0.05);
+  transition: all $transition-base;
+
+  &:active {
+    background: rgba(29, 111, 224, 0.1);
+  }
+}
+
+.supplementBtnText {
+  color: $color-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}

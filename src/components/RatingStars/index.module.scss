@@ -1,0 +1,50 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.stars {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.star {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.starSm { width: 40rpx; height: 40rpx; }
+.starMd { width: 56rpx; height: 56rpx; }
+.starLg { width: 72rpx; height: 72rpx; }
+
+.starText {
+  font-size: inherit;
+  line-height: 1;
+  color: $color-border;
+}
+
+.starSm .starText { font-size: 36rpx; }
+.starMd .starText { font-size: 52rpx; }
+.starLg .starText { font-size: 68rpx; }
+
+.starActive .starText {
+  color: #FFB800;
+}
+
+.starClickable {
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(1.2);
+  }
+}
+
+.ratingText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+}

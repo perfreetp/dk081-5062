@@ -1,0 +1,307 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 140rpx);
+}
+
+.content {
+  padding: $spacing-lg $page-padding;
+}
+
+.itemHeader {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.itemTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.itemMatter {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: block;
+}
+
+.itemMeta {
+  display: flex;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+  gap: $spacing-lg;
+  flex-wrap: wrap;
+}
+
+.metaText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.section {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.textInput {
+  width: 100%;
+  min-height: 200rpx;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  box-sizing: border-box;
+}
+
+.inputHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+  display: block;
+}
+
+.imageUploader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.uploadItem {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: $radius-md;
+  background: $color-bg-page;
+  border: 2rpx dashed $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: all $transition-base;
+  position: relative;
+  overflow: hidden;
+
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+}
+
+.uploadedImage {
+  width: 100%;
+  height: 100%;
+}
+
+.uploadIcon {
+  font-size: 60rpx;
+  color: $color-text-tertiary;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.uploadText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.removeText {
+  font-size: 28rpx;
+  color: #fff;
+  line-height: 1;
+}
+
+.timeSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.timeOption {
+  padding: 20rpx 32rpx;
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.timeOptionActive {
+  background: rgba(29, 111, 224, 0.08);
+  border-color: $color-primary;
+
+  .timeOptionText {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.timeOptionText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.elderlySection {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.elderlyTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: #0D47A1;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.elderlyOptions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.elderlyOption {
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2rpx solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.elderlyOptionActive {
+  background: #fff;
+  border-color: #0D47A1;
+
+  .elderlyOptionText {
+    color: #0D47A1;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.elderlyOptionText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.delegateInput {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 $spacing-md;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-button;
+  border: 2rpx solid rgba(13, 71, 161, 0.2);
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.delegateLabel {
+  font-size: $font-size-xs;
+  color: #0D47A1;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.footerBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-md});
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.cancelBtn {
+  flex: 1;
+  height: 96rpx;
+  border-radius: $radius-button;
+  background: $color-bg-page;
+  border: 2rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.cancelBtnText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+}
+
+.submitBtn {
+  flex: 2;
+  height: 96rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(29, 111, 224, 0.3);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.submitBtnText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}

@@ -1,0 +1,325 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.header {
+  padding: $spacing-lg $page-padding $spacing-xl;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: 0 0 $radius-xl $radius-xl;
+}
+
+.pageTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.pageSubtitle {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+  margin-bottom: $spacing-lg;
+}
+
+.statsRow {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.statItem {
+  flex: 1;
+  padding: $spacing-md;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-md;
+  text-align: center;
+}
+
+.statNum {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  display: block;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.85);
+  display: block;
+  margin-top: 4rpx;
+}
+
+.content {
+  padding: 0 $page-padding;
+  margin-top: -$spacing-md;
+  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-xl});
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.reviewCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.reviewHeader {
+  margin-bottom: $spacing-md;
+}
+
+.reviewTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.reviewMatter {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: block;
+}
+
+.improvementBox {
+  background: linear-gradient(135deg, rgba(0, 168, 112, 0.08) 0%, rgba(0, 196, 140, 0.05) 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+  border-left: 6rpx solid $color-success;
+}
+
+.improvementLabel {
+  font-size: $font-size-xs;
+  color: $color-success;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.improvementText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.ratingSection {
+  margin-bottom: $spacing-lg;
+}
+
+.ratingLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.bigRating {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-md;
+}
+
+.confirmQuestion {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.confirmOptions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.confirmOption {
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.confirmOptionActive {
+  border-color: $color-primary;
+  background: rgba(29, 111, 224, 0.08);
+}
+
+.confirmOptionYes.confirmOptionActive {
+  border-color: $color-success;
+  background: rgba(0, 168, 112, 0.08);
+
+  .confirmOptionText {
+    color: $color-success;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.confirmOptionNo.confirmOptionActive {
+  border-color: $color-error;
+  background: rgba(229, 72, 77, 0.08);
+
+  .confirmOptionText {
+    color: $color-error;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.confirmOptionText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.commentSection {
+  margin-bottom: $spacing-lg;
+}
+
+.commentLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.commentInput {
+  width: 100%;
+  min-height: 160rpx;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  box-sizing: border-box;
+}
+
+.commentHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+  display: block;
+}
+
+.submitBtn {
+  height: 96rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(29, 111, 224, 0.3);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.submitBtnDisabled {
+  background: $color-text-disabled;
+  box-shadow: none;
+}
+
+.submitBtnText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}
+
+.reviewedCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.reviewedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.reviewedTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  flex: 1;
+  @include text-ellipsis;
+}
+
+.reviewedBadge {
+  padding: 8rpx 20rpx;
+  background: rgba(0, 168, 112, 0.1);
+  border-radius: $radius-round;
+  margin-left: $spacing-sm;
+}
+
+.reviewedBadgeText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-success;
+}
+
+.reviewedRating {
+  margin-bottom: $spacing-sm;
+}
+
+.reviewedComment {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.emptyState {
+  padding: $spacing-xl * 2 $page-padding;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  line-height: $line-height-normal;
+}

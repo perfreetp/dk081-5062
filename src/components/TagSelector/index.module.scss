@@ -1,0 +1,40 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  margin-bottom: $spacing-lg;
+}
+
+.title {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.tag {
+  padding: 16rpx 28rpx;
+  border-radius: $radius-button;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.tagSelected {
+  border-width: 2rpx;
+  border-style: solid;
+}
+
+.tagText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
