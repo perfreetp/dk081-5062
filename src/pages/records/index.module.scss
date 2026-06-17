@@ -166,6 +166,23 @@
   color: $color-text-tertiary;
 }
 
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.tagPill {
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+}
+
+.tagPillText {
+  font-size: 20rpx;
+  font-weight: $font-weight-medium;
+}
+
 .recordRating {
   margin-top: $spacing-sm;
   padding-top: $spacing-sm;
@@ -173,11 +190,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
 }
 
 .ratingLabel {
   font-size: $font-size-xs;
   color: $color-text-tertiary;
+}
+
+.reviewConclusion {
+  font-weight: $font-weight-medium;
+}
+
+.conclusionGood {
+  color: $color-success;
+}
+
+.conclusionBad {
+  color: $color-error;
 }
 
 .emptyState {

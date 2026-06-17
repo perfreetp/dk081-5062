@@ -291,6 +291,39 @@
   margin-bottom: $spacing-sm;
 }
 
+.reviewedBadgeGood {
+  background: rgba(0, 168, 112, 0.12);
+}
+
+.reviewedBadgeGood .reviewedBadgeText {
+  color: $color-success;
+}
+
+.reviewedBadgeBad {
+  background: rgba(229, 72, 77, 0.12);
+}
+
+.reviewedBadgeBad .reviewedBadgeText {
+  color: $color-error;
+}
+
+.reviewedImproved {
+  margin-bottom: $spacing-sm;
+}
+
+.reviewedImprovedText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.textGood {
+  color: $color-success;
+}
+
+.textBad {
+  color: $color-error;
+}
+
 .reviewedComment {
   font-size: $font-size-sm;
   color: $color-text-secondary;

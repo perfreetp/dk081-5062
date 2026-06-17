@@ -43,6 +43,8 @@ export interface RevisitItem {
   isOvertime?: boolean;
   reviewRating?: number;
   reviewComment?: string;
+  reviewIsImproved?: boolean;
+  supervisionApplied?: boolean;
   processNodes: ProcessNode[];
 }
 

@@ -5,9 +5,30 @@
   background: $color-bg-page;
 }
 
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-md $page-padding $spacing-sm;
+}
+
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.backBtn {
+  padding: $spacing-sm $spacing-md;
+}
+
+.backBtnText {
+  font-size: $font-size-md;
+  color: #fff;
+  font-weight: $font-weight-medium;
+}
+
 .content {
   padding: $spacing-lg $page-padding;
-  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-xl};
+  padding-bottom: calc(env(safe-area-inset-bottom) + #{$spacing-xl});
 }
 
 .statusHeader {
@@ -18,9 +39,24 @@
   color: $color-text-white;
 }
 
+.speakHint {
+  margin-bottom: $spacing-sm;
+}
+
+.speakHintText {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+  display: inline-block;
+}
+
 .statusBadgeRow {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
   margin-bottom: $spacing-sm;
 }
 
@@ -28,23 +64,66 @@
   padding: 8rpx 24rpx;
   background: rgba(255, 255, 255, 0.25);
   border-radius: $radius-round;
-  margin-right: $spacing-sm;
+}
+
+.status_pending {
+  background: rgba(245, 166, 35, 0.9);
+}
+
+.status_resolved {
+  background: rgba(0, 168, 112, 0.9);
+}
+
+.status_partial {
+  background: rgba(29, 111, 224, 0.9);
+}
+
+.status_unresolved {
+  background: rgba(229, 72, 77, 0.9);
 }
 
 .statusBadgeText {
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
+  color: #fff;
 }
 
 .overtimeTag {
   padding: 6rpx 16rpx;
-  background: rgba(229, 72, 77, 0.9);
+  background: rgba(229, 72, 77, 0.95);
   border-radius: $radius-round;
 }
 
 .overtimeTagText {
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
+  color: #fff;
+}
+
+.elderlyBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 16rpx;
+  background: rgba(227, 242, 253, 0.95);
+  border-radius: $radius-round;
+}
+
+.elderlyBadgeText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: #0D47A1;
+}
+
+.supervisionBadge {
+  padding: 6rpx 16rpx;
+  background: rgba(106, 27, 154, 0.95);
+  border-radius: $radius-round;
+}
+
+.supervisionBadgeText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: #fff;
 }
 
 .detailTitle {
@@ -122,6 +201,14 @@
   line-height: $line-height-loose;
 }
 
+.contactTimeText {
+  margin-top: $spacing-sm;
+  font-size: $font-size-xs;
+  color: #E65100;
+  font-weight: $font-weight-medium;
+  display: block;
+}
+
 .improvementBox {
   background: linear-gradient(135deg, rgba(29, 111, 224, 0.06) 0%, rgba(74, 144, 255, 0.03) 100%);
   border-radius: $radius-md;
@@ -152,9 +239,61 @@
   flex-wrap: wrap;
 }
 
-.improvementMetaText {
+.metaItem {
+  flex: 1;
+  min-width: 45%;
+}
+
+.metaLabel {
   font-size: $font-size-xs;
   color: $color-text-tertiary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.metaValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+}
+
+.metaValueOvertime {
+  color: $color-error;
+  font-weight: $font-weight-semibold;
+}
+
+.supervisionBtn {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #F44336 0%, #E53935 100%);
+  border-radius: $radius-md;
+  text-align: center;
+  box-shadow: 0 8rpx 24rpx rgba(244, 67, 54, 0.3);
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.supervisionBtnText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: #fff;
+}
+
+.supervisionDone {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+  border-radius: $radius-md;
+  text-align: center;
+  border: 2rpx solid rgba(106, 27, 154, 0.2);
+}
+
+.supervisionDoneText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: #6A1B9A;
 }
 
 .supplementBox {
@@ -200,6 +339,10 @@
   display: block;
 }
 
+.reviewRatingRow {
+  margin-bottom: $spacing-md;
+}
+
 .reviewText {
   font-size: $font-size-sm;
   color: $color-text-secondary;
@@ -208,17 +351,47 @@
   display: block;
 }
 
-.elderlyBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 8rpx 20rpx;
-  background: #E3F2FD;
-  border-radius: $radius-round;
+.improvementConclusion {
+  display: flex;
+  align-items: flex-start;
+  padding: $spacing-md;
+  border-radius: $radius-md;
   margin-bottom: $spacing-sm;
+  gap: $spacing-sm;
 }
 
-.elderlyBadgeText {
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-  color: #0D47A1;
+.conclusionGood {
+  background: rgba(0, 168, 112, 0.1);
+}
+
+.conclusionBad {
+  background: rgba(229, 72, 77, 0.1);
+}
+
+.conclusionIcon {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.conclusionGood .conclusionIcon {
+  color: $color-success;
+}
+
+.conclusionBad .conclusionIcon {
+  color: $color-error;
+}
+
+.conclusionText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-normal;
+}
+
+.conclusionGood .conclusionText {
+  color: $color-success;
+}
+
+.conclusionBad .conclusionText {
+  color: $color-error;
 }

@@ -15,7 +15,7 @@ interface PendingReviewItem extends RevisitItem {
 }
 
 const ReviewPage: React.FC = () => {
-  const { elderlyMode, getReviewList, submitReview, revisitList } = useRevisitStore();
+  const { elderlyMode, voiceMode, getReviewList, submitReview, revisitList, speakText } = useRevisitStore();
   const [reviewMap, setReviewMap] = useState<Record<string, PendingReviewItem>>({});
 
   useDidShow(() => {
@@ -42,16 +42,26 @@ const ReviewPage: React.FC = () => {
       ...prev,
       [id]: { ...(prev[id] || (revisitList.find(r => r.id === id) as RevisitItem)), ...patch }
     }));
+    if (voiceMode) {
+      if (patch.rating !== undefined) {
+        speakText(`已选择${patch.rating}星评价`);
+      }
+      if (patch.isImproved !== undefined) {
+        speakText(patch.isImproved ? '已选择：问题真正得到改善' : '已选择：问题尚未改善');
+      }
+    }
   };
 
   const handleSubmit = (item: RevisitItem) => {
     const reviewData = reviewMap[item.id];
     if (!reviewData?.rating) {
       Taro.showToast({ title: '请先评分', icon: 'none' });
+      if (voiceMode) speakText('请先给出星级评价，再提交');
       return;
     }
     if (reviewData.isImproved === undefined) {
       Taro.showToast({ title: '请确认是否真正改善', icon: 'none' });
+      if (voiceMode) speakText('请选择问题是否真正得到改善');
       return;
     }
 
@@ -61,9 +71,10 @@ const ReviewPage: React.FC = () => {
       confirmText: '确认提交',
       success: (res) => {
         if (res.confirm) {
-          submitReview(item.id, reviewData.rating, reviewData.comment);
+          submitReview(item.id, reviewData.rating, reviewData.isImproved!, reviewData.comment);
           Taro.showToast({ title: '评价已提交', icon: 'success' });
-          console.log('[ReviewPage] review submitted:', { id: item.id, rating: reviewData.rating });
+          if (voiceMode) speakText('复核评价已提交，感谢您的反馈');
+          console.log('[ReviewPage] review submitted:', { id: item.id, rating: reviewData.rating, isImproved: reviewData.isImproved });
         }
       }
     });
@@ -205,12 +216,28 @@ const ReviewPage: React.FC = () => {
               <View key={item.id} className={styles.reviewedCard}>
                 <View className={styles.reviewedHeader}>
                   <Text className={classnames(styles.reviewedTitle, 'normalText')}>{item.title}</Text>
-                  <View className={styles.reviewedBadge}>
-                    <Text className={styles.reviewedBadgeText}>已评价</Text>
+                  <View className={classnames(
+                    styles.reviewedBadge,
+                    item.reviewIsImproved ? styles.reviewedBadgeGood : styles.reviewedBadgeBad
+                  )}>
+                    <Text className={styles.reviewedBadgeText}>
+                      {item.reviewIsImproved ? '✓ 群众认可' : '✕ 尚未认可'}
+                    </Text>
                   </View>
                 </View>
                 <View className={styles.reviewedRating}>
                   <RatingStars value={item.reviewRating || 0} readonly size="sm" />
+                </View>
+                <View className={styles.reviewedImproved}>
+                  <Text className={classnames(
+                    styles.reviewedImprovedText,
+                    item.reviewIsImproved ? styles.textGood : styles.textBad,
+                    'smallText'
+                  )}>
+                    {item.reviewIsImproved
+                      ? '群众认为整改后问题已真正改善'
+                      : '群众认为整改后问题尚未真正改善'}
+                  </Text>
                 </View>
                 {item.reviewComment && (
                   <Text className={classnames(styles.reviewedComment, 'smallText')}>

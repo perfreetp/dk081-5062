@@ -6,10 +6,11 @@ import styles from './index.module.scss';
 import { useRevisitStore } from '@/store/revisitStore';
 import ElderlyToggle from '@/components/ElderlyToggle';
 import RatingStars from '@/components/RatingStars';
+import { DISSATISFACTION_TAGS } from '@/types/revisit';
 import type { RevisitStatus } from '@/types/revisit';
 
 const RecordsPage: React.FC = () => {
-  const { elderlyMode, getRecordsList, revisitList } = useRevisitStore();
+  const { elderlyMode, voiceMode, getRecordsList, speakText, revisitList } = useRevisitStore();
   const [filter, setFilter] = useState<'all' | RevisitStatus>('all');
 
   useDidShow(() => {
@@ -50,8 +51,29 @@ const RecordsPage: React.FC = () => {
     { key: 'unresolved', label: '仍未解决' }
   ] as const;
 
-  const handleCardClick = (id: string) => {
+  const handleCardClick = (id: string, title?: string) => {
+    if (voiceMode && title) {
+      speakText(`正在查看：${title}`);
+    }
     Taro.navigateTo({ url: `/pages/detail/index?id=${id}` });
+  };
+
+  const handleFilterClick = (key: typeof filters[number]['key']) => {
+    setFilter(key as any);
+    if (voiceMode) {
+      const labelMap: Record<string, string> = {
+        all: '显示全部回访记录',
+        resolved: '显示已解决的事项',
+        partial: '显示部分解决的事项',
+        unresolved: '显示仍未解决的事项'
+      };
+      speakText(labelMap[key]);
+    }
+  };
+
+  const getTagStyle = (tagValue: string) => {
+    const found = DISSATISFACTION_TAGS.find(t => t.value === tagValue);
+    return found || { bgColor: '#F5F5F5', textColor: '#424242', label: tagValue };
   };
 
   return (
@@ -91,7 +113,7 @@ const RecordsPage: React.FC = () => {
                 styles.filterChip,
                 filter === f.key && styles.filterChipActive
               )}
-              onClick={() => setFilter(f.key as any)}
+              onClick={() => handleFilterClick(f.key)}
             >
               <Text className={classnames(styles.filterChipText, 'smallText')}>{f.label}</Text>
             </View>
@@ -113,7 +135,7 @@ const RecordsPage: React.FC = () => {
               <View
                 key={item.id}
                 className={styles.recordCard}
-                onClick={() => handleCardClick(item.id)}
+                onClick={() => handleCardClick(item.id, item.title)}
               >
                 <View className={styles.recordHeader}>
                   <Text className={classnames(styles.recordTitle, 'cardTitle')}>{item.title}</Text>
@@ -124,12 +146,48 @@ const RecordsPage: React.FC = () => {
                   </View>
                 </View>
                 <Text className={classnames(styles.recordMatter, 'smallText')}>{item.matterName}</Text>
-                {item.reviewRating && (
-                  <View className={styles.recordRating}>
-                    <Text className={classnames(styles.ratingLabel, 'smallText')}>您的评价：</Text>
-                    <RatingStars value={item.reviewRating} readonly size="sm" showText={false} />
+
+                {item.dissatisfactionTags.length > 0 && (
+                  <View className={styles.tagList}>
+                    {item.dissatisfactionTags.slice(0, 4).map(tag => {
+                      const st = getTagStyle(tag);
+                      return (
+                        <View
+                          key={tag}
+                          className={styles.tagPill}
+                          style={{ background: st.bgColor }}
+                        >
+                          <Text className={styles.tagPillText} style={{ color: st.textColor }}>
+                            {st.label}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                    {item.dissatisfactionTags.length > 4 && (
+                      <View className={styles.tagPill} style={{ background: '#F5F5F5' }}>
+                        <Text className={styles.tagPillText} style={{ color: '#757575' }}>
+                          +{item.dissatisfactionTags.length - 4}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 )}
+
+                {item.reviewRating && (
+                  <View className={styles.recordRating}>
+                    <RatingStars value={item.reviewRating} readonly size="sm" showText={false} />
+                    {item.reviewIsImproved !== undefined && (
+                      <Text className={classnames(
+                        styles.reviewConclusion,
+                        item.reviewIsImproved ? styles.conclusionGood : styles.conclusionBad,
+                        'smallText'
+                      )}>
+                        {item.reviewIsImproved ? '✓ 群众认可改善' : '✕ 尚未真正改善'}
+                      </Text>
+                    )}
+                  </View>
+                )}
+
                 <View className={styles.recordMeta}>
                   <Text className={classnames(styles.metaItem, 'smallText')}>{item.department}</Text>
                   <Text className={classnames(styles.metaItem, 'smallText')}>{item.createTime}</Text>

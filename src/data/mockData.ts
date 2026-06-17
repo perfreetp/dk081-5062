@@ -51,10 +51,9 @@ export const mockRevisitList: RevisitItem[] = [
     statusText: '部分解决',
     dissatisfactionTags: ['wait_long', 'repeated_materials'],
     supplementText: '前后跑了三趟，每次都说材料不齐，希望能一次性告知清楚。',
-    isOvertime: true,
     improvement: {
       description: '已安排专人对接，梳理材料清单，将在下次办理时一次性告知全部所需材料。已对窗口工作人员进行业务培训。',
-      promiseTime: '2026-06-20 18:00:00',
+      promiseTime: '2026-06-15 18:00:00',
       operator: '李主任'
     },
     processNodes: [
@@ -78,10 +77,9 @@ export const mockRevisitList: RevisitItem[] = [
     statusText: '仍未解决',
     dissatisfactionTags: ['unclear_info', 'bad_attitude'],
     supplementText: '工作人员态度不好，问了几个问题都不耐烦，而且说的流程和实际办的不一样。',
-    isOvertime: true,
     improvement: {
       description: '已对涉事工作人员进行批评教育，将安排服务礼仪培训。如需重新办理，可联系专人绿色通道办理。',
-      promiseTime: '2026-06-19 18:00:00',
+      promiseTime: '2026-06-16 18:00:00',
       operator: '王科长'
     },
     processNodes: [
@@ -129,6 +127,7 @@ export const mockRevisitList: RevisitItem[] = [
     statusText: '已解决',
     dissatisfactionTags: [],
     reviewRating: 5,
+    reviewIsImproved: true,
     reviewComment: '办理速度很快，工作人员很耐心，非常满意！',
     processNodes: [
       { id: 'n1', title: '事项受理', description: '窗口已受理您的提取申请', time: '2026-06-03 14:30:00', status: 'done' },

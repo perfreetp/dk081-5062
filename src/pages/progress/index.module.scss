@@ -115,6 +115,21 @@
   color: $color-text-white;
 }
 
+.supervisionDone {
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+  border-radius: $radius-md;
+  text-align: center;
+  border: 2rpx solid rgba(106, 27, 154, 0.2);
+  margin-bottom: $spacing-md;
+}
+
+.supervisionDoneText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: #6A1B9A;
+}
+
 .countdown {
   display: inline-flex;
   align-items: center;

@@ -9,7 +9,16 @@ import ElderlyToggle from '@/components/ElderlyToggle';
 import type { RevisitItem } from '@/types/revisit';
 
 const ProgressPage: React.FC = () => {
-  const { elderlyMode, getProgressList, applySupervision, revisitList } = useRevisitStore();
+  const {
+    elderlyMode,
+    voiceMode,
+    getProgressList,
+    checkIsOvertime,
+    applySupervision,
+    speakText,
+    speakItemDetails,
+    revisitList
+  } = useRevisitStore();
   const [filter, setFilter] = useState<'all' | 'overtime' | 'partial' | 'unresolved'>('all');
 
   useDidShow(() => {
@@ -20,7 +29,7 @@ const ProgressPage: React.FC = () => {
     const list = getProgressList();
     switch (filter) {
       case 'overtime':
-        return list.filter(i => i.isOvertime);
+        return list.filter(i => checkIsOvertime(i));
       case 'partial':
         return list.filter(i => i.status === 'partial');
       case 'unresolved':
@@ -31,7 +40,7 @@ const ProgressPage: React.FC = () => {
   }, [revisitList, filter]);
 
   const overtimeList = useMemo(
-    () => getProgressList().filter(i => i.isOvertime),
+    () => getProgressList().filter(i => checkIsOvertime(i)),
     [revisitList]
   );
 
@@ -48,6 +57,7 @@ const ProgressPage: React.FC = () => {
             title: '督办申请已提交',
             icon: 'success'
           });
+          if (voiceMode) speakText('督办申请已提交，已转交督查部门处理');
           console.log('[ProgressPage] supervision applied:', item.id);
         }
       }
@@ -55,11 +65,24 @@ const ProgressPage: React.FC = () => {
   };
 
   const tabs = [
-    { key: 'all', label: '全部' },
-    { key: 'overtime', label: '已超时' },
-    { key: 'partial', label: '部分解决' },
-    { key: 'unresolved', label: '仍未解决' }
-  ] as const;
+    { key: 'all' as const, label: '全部' },
+    { key: 'overtime' as const, label: '已超时' },
+    { key: 'partial' as const, label: '部分解决' },
+    { key: 'unresolved' as const, label: '仍未解决' }
+  ];
+
+  const handleTabClick = (key: typeof tabs[number]['key']) => {
+    setFilter(key);
+    if (voiceMode) {
+      const tabLabels: Record<string, string> = {
+        all: '显示全部事项',
+        overtime: '显示已超时事项',
+        partial: '显示部分解决的事项',
+        unresolved: '显示仍未解决的事项'
+      };
+      speakText(tabLabels[key]);
+    }
+  };
 
   return (
     <View className={classnames(styles.page, elderlyMode && 'elderlyMode')}>
@@ -81,7 +104,7 @@ const ProgressPage: React.FC = () => {
                 styles.filterTab,
                 filter === tab.key && styles.filterTabActive
               )}
-              onClick={() => setFilter(tab.key)}
+              onClick={() => handleTabClick(tab.key)}
             >
               <Text className={classnames(styles.filterTabText, 'smallText')}>
                 {tab.label}
@@ -96,12 +119,18 @@ const ProgressPage: React.FC = () => {
 
       <ScrollView scrollY className={styles.content}>
         {overtimeList.length > 0 && filter === 'all' && (
-          <View className={styles.superviseCard}>
+          <View
+            className={styles.superviseCard}
+            onClick={() => {
+              setFilter('overtime');
+              if (voiceMode) speakText(`您有${overtimeList.length}项事项已超出整改时限，点击可申请再次督办`);
+            }}
+          >
             <Text className={classnames(styles.superviseTitle, 'normalText')}>
               ⚠ 您有 {overtimeList.length} 项事项已超出整改时限
             </Text>
             <Text className={classnames(styles.superviseDesc, 'smallText')}>
-              超时未整改的事项，您可以申请再次督办，上级部门将介入督促办理。
+              超时未整改的事项，您可以申请再次督办，上级部门将介入督促办理。点击查看全部超时事项
             </Text>
           </View>
         )}
@@ -121,20 +150,29 @@ const ProgressPage: React.FC = () => {
             </Text>
           </View>
         ) : (
-          progressList.map(item => (
-            <View key={item.id}>
-              <StatusCard item={item} />
-              {item.isOvertime && (
-                <View
-                  className={styles.superviseBtn}
-                  onClick={() => handleApplySupervision(item)}
-                  style={{ marginBottom: 24 }}
-                >
-                  <Text className={styles.superviseBtnText}>申请再次督办</Text>
+          progressList.map(item => {
+            const isOver = checkIsOvertime(item);
+            return (
+              <View key={item.id}>
+                <View onClick={() => voiceMode && speakItemDetails(item)}>
+                  <StatusCard item={item} />
                 </View>
-              )}
-            </View>
-          ))
+                {isOver && !item.supervisionApplied && (
+                  <View
+                    className={styles.superviseBtn}
+                    onClick={() => handleApplySupervision(item)}
+                  >
+                    <Text className={styles.superviseBtnText}>⚠ 超时未整改，申请再次督办</Text>
+                  </View>
+                )}
+                {isOver && item.supervisionApplied && (
+                  <View className={styles.supervisionDone}>
+                    <Text className={styles.supervisionDoneText}>✓ 已申请上级督办，督查部门处理中</Text>
+                  </View>
+                )}
+              </View>
+            );
+          })
         )}
       </ScrollView>
     </View>

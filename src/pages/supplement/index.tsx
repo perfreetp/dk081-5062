@@ -18,7 +18,15 @@ const timeOptions = [
 const SupplementPage: React.FC = () => {
   const router = useRouter();
   const id = router.params.id as string;
-  const { elderlyMode, getById, submitSupplement, updateStatus } = useRevisitStore();
+  const {
+    elderlyMode,
+    voiceMode,
+    getById,
+    submitSupplement,
+    updateStatus,
+    speakText,
+    speakItemDetails
+  } = useRevisitStore();
   const item = getById(id);
 
   const [selectedTags, setSelectedTags] = useState<DissatisfactionTag[]>([]);
@@ -32,6 +40,17 @@ const SupplementPage: React.FC = () => {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
+    if (voiceMode) {
+      const labelMap: Record<string, string> = {
+        wait_long: '等待时间久',
+        unclear_info: '告知不清',
+        repeated_materials: '材料反复补交',
+        bad_attitude: '态度生硬',
+        other: '其他问题'
+      };
+      const action = !selectedTags.includes(tag) ? '已选中' : '已取消';
+      speakText(`${action}：${labelMap[tag]}`);
+    }
   };
 
   const handleChooseImage = () => {
@@ -57,11 +76,13 @@ const SupplementPage: React.FC = () => {
 
     if (selectedTags.length === 0 && !text.trim()) {
       Taro.showToast({ title: '请选择不满点或填写说明', icon: 'none' });
+      if (voiceMode) speakText('请选择不满点或填写详细说明');
       return;
     }
 
     if (isElderly && !delegateName.trim()) {
       Taro.showToast({ title: '请填写代填家属姓名', icon: 'none' });
+      if (voiceMode) speakText('请填写代填家属姓名');
       return;
     }
 
@@ -79,6 +100,7 @@ const SupplementPage: React.FC = () => {
     });
 
     Taro.showToast({ title: '补充说明已提交', icon: 'success' });
+    if (voiceMode) speakText('补充说明已提交，感谢您的反馈');
     console.log('[SupplementPage] supplement submitted:', {
       id,
       tags: selectedTags,
@@ -107,7 +129,12 @@ const SupplementPage: React.FC = () => {
   return (
     <View className={classnames(styles.page, elderlyMode && 'elderlyMode')}>
       <View className={styles.content}>
-        <View className={styles.itemHeader}>
+        <View
+          className={styles.itemHeader}
+          onClick={() => {
+            if (voiceMode) speakItemDetails(item);
+          }}
+        >
           <Text className={classnames(styles.itemTitle, 'cardTitle')}>{item.title}</Text>
           <Text className={classnames(styles.itemMatter, 'smallText')}>{item.matterName}</Text>
           <View className={styles.itemMeta}>
@@ -115,6 +142,9 @@ const SupplementPage: React.FC = () => {
             <Text className={classnames(styles.metaText, 'smallText')}>{item.sourceText}</Text>
             <Text className={classnames(styles.metaText, 'smallText')}>{item.createTime}</Text>
           </View>
+          {voiceMode && (
+            <Text className={styles.speakHint}>🔊 点击此处可朗读事项信息</Text>
+          )}
         </View>
 
         <View className={styles.section}>
@@ -176,7 +206,13 @@ const SupplementPage: React.FC = () => {
                   styles.timeOption,
                   contactTime === opt.key && styles.timeOptionActive
                 )}
-                onClick={() => setContactTime(opt.key === contactTime ? '' : opt.key)}
+                onClick={() => {
+                  const willSelect = opt.key !== contactTime;
+                  setContactTime(willSelect ? opt.key : '');
+                  if (voiceMode) {
+                    speakText(willSelect ? `已选择联系时间：${opt.label}` : '已取消联系时间选择');
+                  }
+                }}
               >
                 <Text className={classnames(styles.timeOptionText, 'smallText')}>{opt.label}</Text>
               </View>
@@ -195,7 +231,10 @@ const SupplementPage: React.FC = () => {
                 styles.elderlyOption,
                 !isElderly && styles.elderlyOptionActive
               )}
-              onClick={() => setIsElderly(false)}
+              onClick={() => {
+                setIsElderly(false);
+                if (voiceMode) speakText('已选择：本人填写');
+              }}
             >
               <Text className={styles.elderlyOptionText}>本人填写</Text>
             </View>
@@ -204,7 +243,10 @@ const SupplementPage: React.FC = () => {
                 styles.elderlyOption,
                 isElderly && styles.elderlyOptionActive
               )}
-              onClick={() => setIsElderly(true)}
+              onClick={() => {
+                setIsElderly(true);
+                if (voiceMode) speakText('已选择：家属代填，请填写家属姓名');
+              }}
             >
               <Text className={styles.elderlyOptionText}>家属代填</Text>
             </View>

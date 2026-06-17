@@ -46,6 +46,16 @@
   color: $color-text-tertiary;
 }
 
+.speakHint {
+  margin-top: $spacing-sm;
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: rgba(29, 111, 224, 0.08);
+  padding: 8rpx 16rpx;
+  border-radius: $radius-round;
+  display: inline-block;
+}
+
 .section {
   background: $color-bg-card;
   border-radius: $radius-lg;

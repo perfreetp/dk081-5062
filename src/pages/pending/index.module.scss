@@ -126,3 +126,37 @@
   font-size: $font-size-sm;
   color: $color-text-tertiary;
 }
+
+.tagSection {
+  background: #ffffff;
+  border-radius: $radius-md;
+  margin-top: -$spacing-sm;
+  margin-bottom: $spacing-lg;
+  border: 2rpx solid rgba(29, 111, 224, 0.1);
+  border-top: none;
+  overflow: hidden;
+}
+
+.tagHeader {
+  padding: $spacing-md $spacing-lg;
+  background: linear-gradient(135deg, rgba(29, 111, 224, 0.05) 0%, rgba(29, 111, 224, 0.02) 100%);
+  border-bottom: 2rpx solid rgba(29, 111, 224, 0.08);
+}
+
+.tagHeaderText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+}
+
+.tagContent {
+  padding: $spacing-lg;
+}
+
+.tagHint {
+  margin-top: $spacing-md;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: block;
+  text-align: center;
+}
