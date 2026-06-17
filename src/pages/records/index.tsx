@@ -10,7 +10,7 @@ import { DISSATISFACTION_TAGS } from '@/types/revisit';
 import type { RevisitStatus } from '@/types/revisit';
 
 const RecordsPage: React.FC = () => {
-  const { elderlyMode, voiceMode, getRecordsList, speakText, revisitList } = useRevisitStore();
+  const { elderlyMode, voiceMode, getRecordsList, speakText, revisitList, resetAllData } = useRevisitStore();
   const [filter, setFilter] = useState<'all' | RevisitStatus>('all');
 
   useDidShow(() => {
@@ -196,6 +196,31 @@ const RecordsPage: React.FC = () => {
             );
           })
         )}
+
+        <View className={styles.debugSection}>
+          <View
+            className={styles.resetBtn}
+            onClick={() => {
+              Taro.showModal({
+                title: '重置演示数据',
+                content: '确认将所有数据重置为初始状态？此操作不可恢复。',
+                confirmText: '确认重置',
+                confirmColor: '#E5484D',
+                success: (res) => {
+                  if (res.confirm) {
+                    resetAllData();
+                    Taro.showToast({ title: '数据已重置', icon: 'success' });
+                  }
+                }
+              });
+            }}
+          >
+            <Text className={styles.resetBtnText}>🔄 重置演示数据</Text>
+          </View>
+          <Text className={classnames(styles.debugHint, 'smallText')}>
+            （用于重新测试，正式发布可移除此入口）
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );

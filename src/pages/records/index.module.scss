@@ -234,3 +234,35 @@
   font-size: $font-size-sm;
   color: $color-text-tertiary;
 }
+
+.debugSection {
+  margin-top: $spacing-xl;
+  padding: $spacing-lg;
+  text-align: center;
+}
+
+.resetBtn {
+  display: inline-block;
+  padding: $spacing-md $spacing-xl;
+  background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
+  border-radius: $radius-round;
+  border: 2rpx dashed #BDBDBD;
+
+  &:active {
+    transform: scale(0.98);
+    background: #EEEEEE;
+  }
+}
+
+.resetBtnText {
+  font-size: $font-size-sm;
+  color: #616161;
+  font-weight: $font-weight-medium;
+}
+
+.debugHint {
+  margin-top: $spacing-sm;
+  display: block;
+  color: #9E9E9E;
+  font-size: $font-size-xs;
+}
