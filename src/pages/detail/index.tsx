@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image } from '@tarojs/components';
+import React, { useMemo } from 'react';
+import { View, Text, Image, ScrollView } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
@@ -7,7 +7,7 @@ import { useRevisitStore } from '@/store/revisitStore';
 import Timeline from '@/components/Timeline';
 import RatingStars from '@/components/RatingStars';
 import ElderlyToggle from '@/components/ElderlyToggle';
-import { DISSATISFACTION_TAGS } from '@/types/revisit';
+import { DISSATISFACTION_TAGS, STAGE_FLOW } from '@/types/revisit';
 
 const DetailPage: React.FC = () => {
   const router = useRouter();
@@ -22,6 +22,12 @@ const DetailPage: React.FC = () => {
     applySupervision
   } = useRevisitStore();
   const item = getById(id);
+
+  const currentStageIndex = useMemo(() => {
+    if (!item) return 0;
+    const idx = STAGE_FLOW.findIndex(s => s.key === item.stage);
+    return idx >= 0 ? idx : 0;
+  }, [item]);
 
   if (!item) {
     return (
@@ -55,90 +61,135 @@ const DetailPage: React.FC = () => {
     });
   };
 
+  const stageColorMap: Record<string, string> = {
+    stage_pending: '#1D6FE0',
+    stage_department: '#F5A623',
+    stage_supervision: '#E5484D',
+    stage_review: '#00A870',
+    stage_closed: '#9E9E9E'
+  };
+
   return (
     <View className={classnames(styles.page, elderlyMode && 'elderlyMode')}>
-      <View className={styles.header}>
-        <View className={styles.headerBar}>
-          <View
-            className={styles.backBtn}
-            onClick={() => {
-              Taro.navigateBack();
-              if (voiceMode) speakText('返回上一页');
-            }}
-          >
-            <Text className={styles.backBtnText}>← 返回</Text>
-          </View>
-          <ElderlyToggle />
+      <View className={styles.topBar}>
+        <View
+          className={styles.backBtn}
+          onClick={() => {
+            Taro.navigateBack();
+            if (voiceMode) speakText('返回上一页');
+          }}
+        >
+          <Text className={styles.backBtnText}>← 返回</Text>
         </View>
+        <ElderlyToggle />
       </View>
 
-      <View className={styles.content}>
+      <ScrollView scrollY className={styles.content}>
         <View
-          className={styles.statusHeader}
+          className={styles.heroCard}
           onClick={() => {
             if (voiceMode) speakItemDetails(item);
           }}
         >
-          <View className={styles.speakHint}>
-            {voiceMode && (
-              <Text className={styles.speakHintText}>🔊 点击此区域可朗读事项详情</Text>
-            )}
+          <View className={styles.heroStageBadge}>
+            <Text
+              className={styles.heroStageText}
+              style={{ color: stageColorMap[item.stage] }}
+            >
+              {STAGE_FLOW[currentStageIndex]?.icon} {item.stageText}
+            </Text>
           </View>
+          <Text className={classnames(styles.heroTitle, 'pageTitle')}>{item.title}</Text>
+          <Text className={classnames(styles.heroMatter, 'normalText')}>{item.matterName}</Text>
 
-          <View className={styles.statusBadgeRow}>
-            <View className={classnames(styles.statusBadge, styles[`status_${item.status}`])}>
-              <Text className={styles.statusBadgeText}>{item.statusText}</Text>
+          <View className={styles.heroInfoRow}>
+            <View className={styles.heroInfoItem}>
+              <Text className={styles.heroInfoLabel}>承办单位</Text>
+              <Text className={styles.heroInfoValue}>{item.department}</Text>
             </View>
-            {isOvertime && (
-              <View className={styles.overtimeTag}>
-                <Text className={styles.overtimeTagText}>已超时</Text>
-              </View>
-            )}
-            {item.isForElderly && (
-              <View className={styles.elderlyBadge}>
-                <Text className={styles.elderlyBadgeText}>👴 适老化服务</Text>
+            <View className={styles.heroInfoItem}>
+              <Text className={styles.heroInfoLabel}>来源</Text>
+              <Text className={styles.heroInfoValue}>{item.sourceText}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className={styles.flowCard}>
+          <Text className={classnames(styles.sectionTitle, 'cardTitle')}>办理闭环</Text>
+          <View className={styles.flowSteps}>
+            {STAGE_FLOW.map((stage, idx) => {
+              const isDone = idx < currentStageIndex;
+              const isCurrent = idx === currentStageIndex;
+              return (
+                <React.Fragment key={stage.key}>
+                  <View className={styles.flowStep}>
+                    <View className={classnames(
+                      styles.flowStepIcon,
+                      isDone && styles.flowStepDone,
+                      isCurrent && styles.flowStepCurrent
+                    )}>
+                      <Text className={styles.flowStepIconText}>
+                        {isDone ? '✓' : stage.icon}
+                      </Text>
+                    </View>
+                    <Text className={classnames(
+                      styles.flowStepLabel,
+                      (isDone || isCurrent) && styles.flowStepLabelActive
+                    )}>
+                      {stage.label}
+                    </Text>
+                  </View>
+                  {idx < STAGE_FLOW.length - 1 && (
+                    <View className={classnames(
+                      styles.flowConnector,
+                      idx < currentStageIndex && styles.flowConnectorDone
+                    )} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </View>
+        </View>
+
+        <View className={styles.statusCard}>
+          <View className={styles.statusRow}>
+            <View className={styles.statusLabelCol}>
+              <Text className={classnames(styles.statusLabel, 'smallText')}>当前状态</Text>
+              <Text className={classnames(styles.statusValue, 'cardTitle')}>{item.statusText}</Text>
+            </View>
+            {isOvertime && item.stage !== 'stage_closed' && (
+              <View className={styles.overtimeBadge}>
+                <Text className={styles.overtimeText}>⚠ 已超时</Text>
               </View>
             )}
             {item.supervisionApplied && (
               <View className={styles.supervisionBadge}>
-                <Text className={styles.supervisionBadgeText}>督办中</Text>
+                <Text className={styles.supervisionText}>🔍 已督办</Text>
               </View>
             )}
           </View>
 
-          <Text className={classnames(styles.detailTitle, 'pageTitle')}>{item.title}</Text>
-          <Text className={classnames(styles.detailMatter, 'normalText')}>{item.matterName}</Text>
-
-          <View className={styles.infoGrid}>
-            <View className={styles.infoItem}>
-              <Text className={styles.infoLabel}>承办单位</Text>
-              <Text className={styles.infoValue}>{item.department}</Text>
+          <View className={styles.handlerRow}>
+            <View className={styles.handlerCol}>
+              <Text className={classnames(styles.handlerLabel, 'smallText')}>当前处理方</Text>
+              <Text className={classnames(styles.handlerValue, 'normalText')}>
+                {item.currentHandlerDept || '-'}
+                {' '}
+                <Text className={styles.handlerName}>
+                  {item.currentHandler ? `· ${item.currentHandler}` : ''}
+                </Text>
+              </Text>
             </View>
-            <View className={styles.infoItem}>
-              <Text className={styles.infoLabel}>来源</Text>
-              <Text className={styles.infoValue}>{item.sourceText}</Text>
-            </View>
-            {item.windowNo && (
-              <View className={styles.infoItem}>
-                <Text className={styles.infoLabel}>窗口号</Text>
-                <Text className={styles.infoValue}>{item.windowNo}</Text>
-              </View>
-            )}
-            <View className={styles.infoItem}>
-              <Text className={styles.infoLabel}>发起时间</Text>
-              <Text className={styles.infoValue}>{item.createTime}</Text>
-            </View>
-            <View className={styles.infoItem}>
-              <Text className={styles.infoLabel}>截止时间</Text>
-              <Text className={styles.infoValue}>{item.deadline}</Text>
-            </View>
-            {item.delegateName && (
-              <View className={styles.infoItem}>
-                <Text className={styles.infoLabel}>代填家属</Text>
-                <Text className={styles.infoValue}>{item.delegateName}</Text>
-              </View>
-            )}
           </View>
+
+          {item.nextAction && (
+            <View className={styles.nextActionRow}>
+              <Text className={styles.nextActionIcon}>👉</Text>
+              <Text className={classnames(styles.nextActionText, 'normalText')}>
+                下一步：{item.nextAction}
+              </Text>
+            </View>
+          )}
         </View>
 
         {item.dissatisfactionTags.length > 0 && (
@@ -150,13 +201,13 @@ const DetailPage: React.FC = () => {
                 return (
                   <View
                     key={tag}
-                    className={styles.tag}
+                    className={styles.tagPill}
                     style={{ background: style.bgColor }}
                     onClick={() => {
                       if (voiceMode) speakText(`不满点：${style.label}`);
                     }}
                   >
-                    <Text className={styles.tagText} style={{ color: style.textColor }}>
+                    <Text className={styles.tagPillText} style={{ color: style.textColor }}>
                       {style.label}
                     </Text>
                   </View>
@@ -182,18 +233,13 @@ const DetailPage: React.FC = () => {
               {item.contactTime && (
                 <Text className={styles.contactTimeText}>期望联系时间：{item.contactTime}</Text>
               )}
+              {item.delegateName && (
+                <Text className={styles.delegateText}>👴 家属代填：{item.delegateName}</Text>
+              )}
               {item.supplementImages && item.supplementImages.length > 0 && (
                 <View className={styles.imageList}>
                   {item.supplementImages.map((img, idx) => (
-                    <Image
-                      key={idx}
-                      className={styles.suppImage}
-                      src={img}
-                      mode="aspectFill"
-                      onClick={() => {
-                        if (voiceMode) speakText(`第${idx + 1}张图片`);
-                      }}
-                    />
+                    <Image key={idx} className={styles.suppImage} src={img} mode="aspectFill" />
                   ))}
                 </View>
               )}
@@ -201,47 +247,81 @@ const DetailPage: React.FC = () => {
           </View>
         )}
 
-        {item.improvement && (
+        {(item.improvement || item.reimprovement) && (
           <View className={styles.card}>
             <Text className={classnames(styles.cardTitle, 'normalText')}>整改说明</Text>
-            <View className={styles.improvementBox}>
-              <Text className={styles.improvementLabel}>承办单位整改措施</Text>
-              <Text
-                className={styles.improvementText}
-                onClick={() => {
-                  if (voiceMode) speakText(`整改说明：${item.improvement!.description}。承诺完成时间：${item.improvement!.promiseTime}。负责人：${item.improvement!.operator}`);
-                }}
-              >
-                {item.improvement.description}
-              </Text>
-              <View className={styles.improvementMeta}>
-                <View className={styles.metaItem}>
-                  <Text className={styles.metaLabel}>承诺完成</Text>
-                  <Text className={classnames(
-                    styles.metaValue,
-                    isOvertime && styles.metaValueOvertime
-                  )}>
-                    {item.improvement.promiseTime}
-                    {isOvertime && '（已超时）'}
-                  </Text>
+
+            {item.improvement && (
+              <View className={styles.improvementBox}>
+                <Text className={styles.improvementLabel}>首次整改方案</Text>
+                <Text
+                  className={styles.improvementText}
+                  onClick={() => {
+                    if (voiceMode) speakText(`整改说明：${item.improvement!.description}。承诺完成时间：${item.improvement!.promiseTime}。负责人：${item.improvement!.operator}`);
+                  }}
+                >
+                  {item.improvement.description}
+                </Text>
+                <View className={styles.improvementMeta}>
+                  <View className={styles.metaItem}>
+                    <Text className={styles.metaLabel}>承诺完成</Text>
+                    <Text className={classnames(
+                      styles.metaValue,
+                      isOvertime && !item.reimprovement && styles.metaValueOvertime
+                    )}>
+                      {item.improvement.promiseTime}
+                      {isOvertime && !item.reimprovement && '（已超时）'}
+                    </Text>
+                  </View>
+                  <View className={styles.metaItem}>
+                    <Text className={styles.metaLabel}>负责人</Text>
+                    <Text className={styles.metaValue}>{item.improvement.operator}</Text>
+                  </View>
                 </View>
-                <View className={styles.metaItem}>
-                  <Text className={styles.metaLabel}>负责人</Text>
-                  <Text className={styles.metaValue}>{item.improvement.operator}</Text>
-                </View>
-              </View>
-            </View>
-            {isOvertime && !item.supervisionApplied && (
-              <View
-                className={styles.supervisionBtn}
-                onClick={handleApplySupervision}
-              >
-                <Text className={styles.supervisionBtnText}>⚠ 超时未整改，申请再次督办</Text>
               </View>
             )}
+
+            {item.reimprovement && (
+              <View className={classnames(styles.improvementBox, styles.reimprovementBox)}>
+                <Text className={classnames(styles.improvementLabel, styles.reimproveLabel)}>
+                  二次整改方案 {item.supervisionApplied ? '(督查督办)' : ''}
+                </Text>
+                <Text
+                  className={styles.improvementText}
+                  onClick={() => {
+                    if (voiceMode && item.reimprovement) {
+                      speakText(`二次整改说明：${item.reimprovement.description}。负责人：${item.reimprovement.operator}`);
+                    }
+                  }}
+                >
+                  {item.reimprovement.description}
+                </Text>
+                {item.reimprovement.promiseTime && (
+                  <View className={styles.improvementMeta}>
+                    <View className={styles.metaItem}>
+                      <Text className={styles.metaLabel}>二次承诺</Text>
+                      <Text className={styles.metaValue}>{item.reimprovement.promiseTime}</Text>
+                    </View>
+                    <View className={styles.metaItem}>
+                      <Text className={styles.metaLabel}>负责人</Text>
+                      <Text className={styles.metaValue}>{item.reimprovement.operator}</Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {isOvertime && !item.supervisionApplied && item.stage === 'stage_department' && (
+              <View className={styles.superviseBtn} onClick={handleApplySupervision}>
+                <Text className={styles.superviseBtnText}>⚠ 超时未整改，申请再次督办</Text>
+              </View>
+            )}
+
             {item.supervisionApplied && (
               <View className={styles.supervisionDone}>
-                <Text className={styles.supervisionDoneText}>✓ 已申请上级督办，督查部门处理中</Text>
+                <Text className={styles.supervisionDoneText}>
+                  ✓ 已申请上级督办，督查部门正在处理中
+                </Text>
               </View>
             )}
           </View>
@@ -251,7 +331,10 @@ const DetailPage: React.FC = () => {
           <View className={styles.card}>
             <Text className={classnames(styles.cardTitle, 'normalText')}>复核评价</Text>
             <View className={styles.reviewBox}>
-              <Text className={styles.reviewLabel}>您的评价</Text>
+              <View className={styles.reviewHeader}>
+                <Text className={styles.reviewLabel}>您的评价</Text>
+                <Text className={styles.reviewCountBadge}>第 {item.reviewCount} 次评价</Text>
+              </View>
               <View className={styles.reviewRatingRow}>
                 <RatingStars value={item.reviewRating} readonly size="lg" />
               </View>
@@ -278,6 +361,13 @@ const DetailPage: React.FC = () => {
                   "{item.reviewComment}"
                 </Text>
               )}
+              {item.reviewIsImproved === false && item.stage !== 'stage_closed' && (
+                <View className={styles.reviewTrackHint}>
+                  <Text className={styles.reviewTrackText}>
+                    🔄 已重新进入整改流程，承办单位将进行二次整改
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -286,7 +376,91 @@ const DetailPage: React.FC = () => {
           <Text className={classnames(styles.cardTitle, 'normalText')}>处理流程</Text>
           <Timeline nodes={item.processNodes} />
         </View>
-      </View>
+
+        <View style={{ height: 120 }} />
+      </ScrollView>
+
+      {(item.stage === 'stage_pending' || item.stage === 'stage_department' || item.stage === 'stage_review') && (
+        <View className={styles.bottomBar}>
+          {item.stage === 'stage_pending' && (
+            <>
+              <View
+                className={classnames(styles.bottomBtn, styles.bottomBtnSecondary)}
+                onClick={() => {
+                  Taro.navigateTo({ url: `/pages/supplement/index?id=${item.id}` });
+                  if (voiceMode) speakText('前往补充说明页面');
+                }}
+              >
+                <Text className={styles.bottomBtnText}>补充说明</Text>
+              </View>
+              <View
+                className={classnames(styles.bottomBtn, styles.bottomBtnPrimary)}
+                onClick={() => {
+                  Taro.switchTab({ url: '/pages/pending/index' });
+                  if (voiceMode) speakText('前往待确认页面');
+                }}
+              >
+                <Text className={styles.bottomBtnTextPrimary}>去确认</Text>
+              </View>
+            </>
+          )}
+          {item.stage === 'stage_department' && isOvertime && (
+            <View
+              className={classnames(styles.bottomBtn, styles.bottomBtnDanger)}
+              onClick={handleApplySupervision}
+            >
+              <Text className={styles.bottomBtnTextPrimary}>申请再次督办</Text>
+            </View>
+          )}
+          {item.stage === 'stage_department' && !isOvertime && (
+            <View
+              className={classnames(styles.bottomBtn, styles.bottomBtnDisabled)}
+            >
+              <Text className={styles.bottomBtnText}>部门整改中，请耐心等待</Text>
+            </View>
+          )}
+          {item.stage === 'stage_review' && !item.reviewRating && (
+            <View
+              className={classnames(styles.bottomBtn, styles.bottomBtnPrimary)}
+              onClick={() => {
+                Taro.switchTab({ url: '/pages/review/index' });
+                if (voiceMode) speakText('前往结果评价页面');
+              }}
+            >
+              <Text className={styles.bottomBtnTextPrimary}>去评价</Text>
+            </View>
+          )}
+          {item.stage === 'stage_review' && item.reviewRating && (
+            <View
+              className={classnames(styles.bottomBtn, styles.bottomBtnDisabled)}
+            >
+              <Text className={styles.bottomBtnText}>已完成评价</Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {item.stage === 'stage_supervision' && (
+        <View className={styles.bottomBar}>
+          <View
+            className={classnames(styles.bottomBtn, styles.bottomBtnSupervision)}
+          >
+            <Text className={styles.bottomBtnTextPrimary}>督查部门督办中</Text>
+          </View>
+        </View>
+      )}
+
+      {item.stage === 'stage_closed' && (
+        <View className={styles.bottomBar}>
+          <View
+            className={classnames(styles.bottomBtn, styles.bottomBtnClosed)}
+          >
+            <Text className={styles.bottomBtnTextPrimary}>
+              {item.status === 'closed_good' ? '✓ 已办结（群众认可）' : '✕ 已办结（未认可）'}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 };

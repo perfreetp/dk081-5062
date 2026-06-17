@@ -15,7 +15,7 @@ interface PendingReviewItem extends RevisitItem {
 }
 
 const ReviewPage: React.FC = () => {
-  const { elderlyMode, voiceMode, getReviewList, submitReview, revisitList, speakText } = useRevisitStore();
+  const { elderlyMode, voiceMode, getReviewList, submitReview, revisitList, speakText, speakItemDetails } = useRevisitStore();
   const [reviewMap, setReviewMap] = useState<Record<string, PendingReviewItem>>({});
 
   useDidShow(() => {
@@ -25,7 +25,7 @@ const ReviewPage: React.FC = () => {
   const pendingList = useMemo(() => getReviewList(), [revisitList]);
 
   const reviewedList = useMemo(
-    () => revisitList.filter(r => r.reviewRating),
+    () => revisitList.filter(r => r.reviewRating !== undefined),
     [revisitList]
   );
 
@@ -71,10 +71,24 @@ const ReviewPage: React.FC = () => {
       confirmText: '确认提交',
       success: (res) => {
         if (res.confirm) {
-          submitReview(item.id, reviewData.rating, reviewData.isImproved!, reviewData.comment);
+          submitReview(item.id, {
+            rating: reviewData.rating,
+            isImproved: reviewData.isImproved!,
+            comment: reviewData.comment
+          });
           Taro.showToast({ title: '评价已提交', icon: 'success' });
-          if (voiceMode) speakText('复核评价已提交，感谢您的反馈');
-          console.log('[ReviewPage] review submitted:', { id: item.id, rating: reviewData.rating, isImproved: reviewData.isImproved });
+          if (voiceMode) {
+            speakText(
+              reviewData.isImproved
+                ? '复核评价已提交，事项已办结，感谢您的反馈'
+                : '复核评价已提交，已启动二次整改程序，感谢您的反馈'
+            );
+          }
+          console.log('[ReviewPage] review submitted:', {
+            id: item.id,
+            rating: reviewData.rating,
+            isImproved: reviewData.isImproved
+          });
         }
       }
     });
@@ -83,6 +97,38 @@ const ReviewPage: React.FC = () => {
   const canSubmit = (id: string) => {
     const d = reviewMap[id];
     return d?.rating && d?.isImproved !== undefined;
+  };
+
+  const handleCardVoiceClick = (e: React.MouseEvent, item: RevisitItem) => {
+    e.stopPropagation();
+    if (voiceMode) {
+      speakItemDetails(item);
+    }
+  };
+
+  const handleReviewedClick = (item: RevisitItem) => {
+    if (voiceMode) {
+      speakText(`正在查看：${item.title}，${item.reviewIsImproved ? '群众认可，已办结' : '尚未认可，二次整改中'}`);
+    }
+    Taro.navigateTo({ url: `/pages/detail/index?id=${item.id}` });
+  };
+
+  const handleTrackClick = (e: React.MouseEvent, item: RevisitItem) => {
+    e.stopPropagation();
+    if (voiceMode) {
+      speakText('正在进入详情页，查看二次整改进展');
+    }
+    Taro.navigateTo({ url: `/pages/detail/index?id=${item.id}` });
+  };
+
+  const handleStatVoice = (type: string) => {
+    if (!voiceMode) return;
+    const textMap: Record<string, string> = {
+      pending: `待评价事项${stats.pending}件`,
+      reviewed: `已评价事项${stats.reviewed}件`,
+      avgRating: `平均星级${stats.avgRating}星`
+    };
+    speakText(textMap[type] || '');
   };
 
   return (
@@ -98,15 +144,15 @@ const ReviewPage: React.FC = () => {
           <ElderlyToggle />
         </View>
         <View className={styles.statsRow}>
-          <View className={styles.statItem}>
+          <View className={styles.statItem} onClick={() => handleStatVoice('pending')}>
             <Text className={styles.statNum}>{stats.pending}</Text>
             <Text className={classnames(styles.statLabel, 'smallText')}>待评价</Text>
           </View>
-          <View className={styles.statItem}>
+          <View className={styles.statItem} onClick={() => handleStatVoice('reviewed')}>
             <Text className={styles.statNum}>{stats.reviewed}</Text>
             <Text className={classnames(styles.statLabel, 'smallText')}>已评价</Text>
           </View>
-          <View className={styles.statItem}>
+          <View className={styles.statItem} onClick={() => handleStatVoice('avgRating')}>
             <Text className={styles.statNum}>{stats.avgRating}</Text>
             <Text className={classnames(styles.statLabel, 'smallText')}>平均星级</Text>
           </View>
@@ -130,8 +176,16 @@ const ReviewPage: React.FC = () => {
             const reviewData = reviewMap[item.id] || {};
             return (
               <View key={item.id} className={styles.reviewCard}>
-                <View className={styles.reviewHeader}>
+                <View
+                  className={styles.reviewHeader}
+                  onClick={(e) => handleCardVoiceClick(e, item)}
+                >
                   <Text className={classnames(styles.reviewTitle, 'cardTitle')}>{item.title}</Text>
+                  {voiceMode && (
+                    <View className={styles.voiceIcon}>
+                      <Text className={styles.voiceIconText}>🔊</Text>
+                    </View>
+                  )}
                 </View>
                 <Text className={classnames(styles.reviewMatter, 'smallText')}>{item.matterName}</Text>
 
@@ -213,7 +267,14 @@ const ReviewPage: React.FC = () => {
               已完成的评价
             </Text>
             {reviewedList.map(item => (
-              <View key={item.id} className={styles.reviewedCard}>
+              <View
+                key={item.id}
+                className={classnames(
+                  styles.reviewedCard,
+                  !item.reviewIsImproved && styles.reviewedCardRehandling
+                )}
+                onClick={() => handleReviewedClick(item)}
+              >
                 <View className={styles.reviewedHeader}>
                   <Text className={classnames(styles.reviewedTitle, 'normalText')}>{item.title}</Text>
                   <View className={classnames(
@@ -225,9 +286,11 @@ const ReviewPage: React.FC = () => {
                     </Text>
                   </View>
                 </View>
+
                 <View className={styles.reviewedRating}>
                   <RatingStars value={item.reviewRating || 0} readonly size="sm" />
                 </View>
+
                 <View className={styles.reviewedImproved}>
                   <Text className={classnames(
                     styles.reviewedImprovedText,
@@ -235,14 +298,41 @@ const ReviewPage: React.FC = () => {
                     'smallText'
                   )}>
                     {item.reviewIsImproved
-                      ? '群众认为整改后问题已真正改善'
+                      ? '群众认为整改后问题已真正改善，事项已办结'
                       : '群众认为整改后问题尚未真正改善'}
                   </Text>
                 </View>
+
                 {item.reviewComment && (
                   <Text className={classnames(styles.reviewedComment, 'smallText')}>
                     "{item.reviewComment}"
                   </Text>
+                )}
+
+                {!item.reviewIsImproved && (
+                  <View
+                    className={styles.trackEntry}
+                    onClick={(e) => handleTrackClick(e, item)}
+                  >
+                    <View className={styles.trackEntryLeft}>
+                      <Text className={styles.trackEntryIcon}>🔄</Text>
+                      <View>
+                        <Text className={classnames(styles.trackEntryTitle, 'normalText')}>二次整改中</Text>
+                        <Text className={classnames(styles.trackEntryDesc, 'smallText')}>
+                          承办单位正在再次整改，点击查看进展
+                        </Text>
+                      </View>
+                    </View>
+                    <Text className={styles.trackEntryArrow}>›</Text>
+                  </View>
+                )}
+
+                {item.reviewIsImproved && (
+                  <View className={styles.closedInfo}>
+                    <Text className={classnames(styles.closedInfoText, 'smallText')}>
+                      办结时间：{item.closedTime || '--'}
+                    </Text>
+                  </View>
                 )}
               </View>
             ))}

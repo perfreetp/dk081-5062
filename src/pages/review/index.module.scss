@@ -77,6 +77,25 @@
 
 .reviewHeader {
   margin-bottom: $spacing-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.voiceIcon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: rgba(29, 111, 224, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.voiceIconText {
+  font-size: 28rpx;
 }
 
 .reviewTitle {
@@ -332,6 +351,68 @@
   border-top: 1rpx solid $color-divider;
 }
 
+.reviewedCardRehandling {
+  border-left: 6rpx solid $color-warning;
+}
+
+.trackEntry {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.08) 0%, rgba(255, 193, 7, 0.05) 100%);
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.trackEntryLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+}
+
+.trackEntryIcon {
+  font-size: 40rpx;
+}
+
+.trackEntryTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-warning;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.trackEntryDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: block;
+}
+
+.trackEntryArrow {
+  font-size: 36rpx;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+}
+
+.closedInfo {
+  margin-top: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.closedInfoText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
 .emptyState {
   padding: $spacing-xl * 2 $page-padding;
   text-align: center;
@@ -355,4 +436,44 @@
   font-size: $font-size-sm;
   color: $color-text-tertiary;
   line-height: $line-height-normal;
+}
+
+.elderlyMode {
+  .reviewCard {
+    padding: $spacing-lg;
+  }
+
+  .reviewedCard {
+    padding: $spacing-lg;
+  }
+
+  .confirmOption {
+    height: 104rpx;
+  }
+
+  .submitBtn {
+    height: 112rpx;
+  }
+
+  .commentInput {
+    min-height: 200rpx;
+    padding: $spacing-md;
+  }
+
+  .voiceIcon {
+    width: 72rpx;
+    height: 72rpx;
+  }
+
+  .voiceIconText {
+    font-size: 36rpx;
+  }
+
+  .trackEntry {
+    padding: $spacing-md $spacing-lg;
+  }
+
+  .trackEntryIcon {
+    font-size: 48rpx;
+  }
 }

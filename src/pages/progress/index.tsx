@@ -19,7 +19,7 @@ const ProgressPage: React.FC = () => {
     speakItemDetails,
     revisitList
   } = useRevisitStore();
-  const [filter, setFilter] = useState<'all' | 'overtime' | 'partial' | 'unresolved'>('all');
+  const [filter, setFilter] = useState<'all' | 'overtime' | 'supervision' | 'rehandling'>('all');
 
   useDidShow(() => {
     console.log('[ProgressPage] page show');
@@ -29,36 +29,37 @@ const ProgressPage: React.FC = () => {
     const list = getProgressList();
     switch (filter) {
       case 'overtime':
-        return list.filter(i => checkIsOvertime(i));
-      case 'partial':
-        return list.filter(i => i.status === 'partial');
-      case 'unresolved':
-        return list.filter(i => i.status === 'unresolved');
+        return list.filter(i => checkIsOvertime(i) && !i.supervisionApplied && i.stage === 'stage_department');
+      case 'supervision':
+        return list.filter(i => i.stage === 'stage_supervision');
+      case 'rehandling':
+        return list.filter(i => i.status === 'rehandling');
       default:
         return list;
     }
   }, [revisitList, filter]);
 
   const overtimeList = useMemo(
-    () => getProgressList().filter(i => checkIsOvertime(i)),
+    () => getProgressList().filter(i => checkIsOvertime(i) && !i.supervisionApplied && i.stage === 'stage_department'),
+    [revisitList]
+  );
+
+  const supervisionList = useMemo(
+    () => getProgressList().filter(i => i.stage === 'stage_supervision'),
     [revisitList]
   );
 
   const handleApplySupervision = (item: RevisitItem) => {
     Taro.showModal({
       title: '申请再次督办',
-      content: `确认对「${item.title}」申请上级督办？相关部门将在24小时内介入处理。`,
+      content: `确认对「${item.title}」申请上级督办？督查部门将在24小时内介入处理。`,
       confirmText: '确认申请',
       confirmColor: '#E5484D',
       success: (res) => {
         if (res.confirm) {
           applySupervision(item.id);
-          Taro.showToast({
-            title: '督办申请已提交',
-            icon: 'success'
-          });
-          if (voiceMode) speakText('督办申请已提交，已转交督查部门处理');
-          console.log('[ProgressPage] supervision applied:', item.id);
+          Taro.showToast({ title: '督办申请已提交', icon: 'success' });
+          if (voiceMode) speakText('督办申请已提交，督查部门已受理');
         }
       }
     });
@@ -66,22 +67,29 @@ const ProgressPage: React.FC = () => {
 
   const tabs = [
     { key: 'all' as const, label: '全部' },
-    { key: 'overtime' as const, label: '已超时' },
-    { key: 'partial' as const, label: '部分解决' },
-    { key: 'unresolved' as const, label: '仍未解决' }
+    { key: 'overtime' as const, label: '超时待督办' },
+    { key: 'supervision' as const, label: '督办中' },
+    { key: 'rehandling' as const, label: '二次整改' }
   ];
 
   const handleTabClick = (key: typeof tabs[number]['key']) => {
     setFilter(key);
     if (voiceMode) {
       const tabLabels: Record<string, string> = {
-        all: '显示全部事项',
-        overtime: '显示已超时事项',
-        partial: '显示部分解决的事项',
-        unresolved: '显示仍未解决的事项'
+        all: '显示全部处理中事项',
+        overtime: '显示超时待督办事项',
+        supervision: '显示督查督办中的事项',
+        rehandling: '显示二次整改中的事项'
       };
       speakText(tabLabels[key]);
     }
+  };
+
+  const handleCardClick = (item: RevisitItem) => {
+    if (voiceMode) speakItemDetails(item);
+    setTimeout(() => {
+      Taro.navigateTo({ url: `/pages/detail/index?id=${item.id}` });
+    }, 300);
   };
 
   return (
@@ -123,14 +131,25 @@ const ProgressPage: React.FC = () => {
             className={styles.superviseCard}
             onClick={() => {
               setFilter('overtime');
-              if (voiceMode) speakText(`您有${overtimeList.length}项事项已超出整改时限，点击可申请再次督办`);
+              if (voiceMode) speakText(`您有${overtimeList.length}项事项已超出整改时限，可申请再次督办`);
             }}
           >
             <Text className={classnames(styles.superviseTitle, 'normalText')}>
               ⚠ 您有 {overtimeList.length} 项事项已超出整改时限
             </Text>
             <Text className={classnames(styles.superviseDesc, 'smallText')}>
-              超时未整改的事项，您可以申请再次督办，上级部门将介入督促办理。点击查看全部超时事项
+              超时未整改的事项，可申请再次督办，上级部门将介入督促办理。点击查看全部超时事项
+            </Text>
+          </View>
+        )}
+
+        {supervisionList.length > 0 && filter === 'all' && (
+          <View className={styles.supervisionRemindCard}>
+            <Text className={classnames(styles.supervisionRemindTitle, 'normalText')}>
+              🔍 {supervisionList.length} 项正在督查督办
+            </Text>
+            <Text className={classnames(styles.supervisionRemindDesc, 'smallText')}>
+              督办事项由督查部门跟进，承办单位需限期完成二次整改
             </Text>
           </View>
         )}
@@ -152,12 +171,27 @@ const ProgressPage: React.FC = () => {
         ) : (
           progressList.map(item => {
             const isOver = checkIsOvertime(item);
+            const showSuperviseBtn = isOver && !item.supervisionApplied && item.stage === 'stage_department';
             return (
               <View key={item.id}>
-                <View onClick={() => voiceMode && speakItemDetails(item)}>
+                <View onClick={() => handleCardClick(item)}>
                   <StatusCard item={item} />
                 </View>
-                {isOver && !item.supervisionApplied && (
+                {item.stage === 'stage_supervision' && (
+                  <View className={styles.supervisionStatus}>
+                    <Text className={styles.supervisionStatusText}>
+                      🔍 督查部门督办中，等待承办单位二次整改反馈
+                    </Text>
+                  </View>
+                )}
+                {item.status === 'rehandling' && item.stage === 'stage_department' && (
+                  <View className={styles.rehandlingStatus}>
+                    <Text className={styles.rehandlingStatusText}>
+                      🔄 二次整改中，承办单位正在制定深入整改方案
+                    </Text>
+                  </View>
+                )}
+                {showSuperviseBtn && (
                   <View
                     className={styles.superviseBtn}
                     onClick={() => handleApplySupervision(item)}
@@ -165,7 +199,7 @@ const ProgressPage: React.FC = () => {
                     <Text className={styles.superviseBtnText}>⚠ 超时未整改，申请再次督办</Text>
                   </View>
                 )}
-                {isOver && item.supervisionApplied && (
+                {item.supervisionApplied && (
                   <View className={styles.supervisionDone}>
                     <Text className={styles.supervisionDoneText}>✓ 已申请上级督办，督查部门处理中</Text>
                   </View>

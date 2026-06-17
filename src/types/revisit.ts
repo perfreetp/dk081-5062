@@ -1,4 +1,18 @@
-export type RevisitStatus = 'pending' | 'resolved' | 'partial' | 'unresolved';
+export type RevisitStatus =
+  | 'pending'
+  | 'resolved'
+  | 'partial'
+  | 'unresolved'
+  | 'rehandling'
+  | 'closed_good'
+  | 'closed_bad';
+
+export type RevisitStage =
+  | 'stage_pending'
+  | 'stage_department'
+  | 'stage_supervision'
+  | 'stage_review'
+  | 'stage_closed';
 
 export type RevisitSource = 'window' | 'approval' | 'hotline';
 
@@ -15,6 +29,19 @@ export interface ProcessNode {
   description: string;
   time: string;
   status: 'done' | 'current' | 'pending';
+  department?: string;
+  operator?: string;
+  nodeType?:
+    | 'mass_confirm'
+    | 'department_rectify'
+    | 'supervision_apply'
+    | 'supervision_accept'
+    | 'supervision_handle'
+    | 'rehandle_start'
+    | 'rehandle_done'
+    | 'review_pending'
+    | 'review_done'
+    | 'closed';
 }
 
 export interface RevisitItem {
@@ -29,6 +56,11 @@ export interface RevisitItem {
   deadline: string;
   status: RevisitStatus;
   statusText: string;
+  stage: RevisitStage;
+  stageText: string;
+  currentHandler?: string;
+  currentHandlerDept?: string;
+  nextAction?: string;
   dissatisfactionTags: DissatisfactionTag[];
   supplementText?: string;
   supplementImages?: string[];
@@ -40,11 +72,19 @@ export interface RevisitItem {
     promiseTime: string;
     operator: string;
   };
-  isOvertime?: boolean;
+  reimprovement?: {
+    description: string;
+    promiseTime: string;
+    operator: string;
+  };
+  reviewCount: number;
   reviewRating?: number;
   reviewComment?: string;
   reviewIsImproved?: boolean;
   supervisionApplied?: boolean;
+  supervisionLevel?: 0 | 1 | 2;
+  closed?: boolean;
+  closedTime?: string;
   processNodes: ProcessNode[];
 }
 
@@ -73,5 +113,24 @@ export const STATUS_TEXT_MAP: Record<RevisitStatus, string> = {
   pending: '待确认',
   resolved: '已解决',
   partial: '部分解决',
-  unresolved: '仍未解决'
+  unresolved: '仍未解决',
+  rehandling: '再次整改中',
+  closed_good: '已办结(认可)',
+  closed_bad: '已办结(未认可)'
 };
+
+export const STAGE_TEXT_MAP: Record<RevisitStage, string> = {
+  stage_pending: '群众确认',
+  stage_department: '部门整改',
+  stage_supervision: '督查督办',
+  stage_review: '复核评价',
+  stage_closed: '已办结'
+};
+
+export const STAGE_FLOW: { key: RevisitStage; label: string; icon: string }[] = [
+  { key: 'stage_pending', label: '群众反馈', icon: '👤' },
+  { key: 'stage_department', label: '部门整改', icon: '🏢' },
+  { key: 'stage_supervision', label: '督查督办', icon: '🔍' },
+  { key: 'stage_review', label: '复核评价', icon: '⭐' },
+  { key: 'stage_closed', label: '办结归档', icon: '✅' }
+];

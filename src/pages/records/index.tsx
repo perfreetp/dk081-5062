@@ -5,50 +5,51 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useRevisitStore } from '@/store/revisitStore';
 import ElderlyToggle from '@/components/ElderlyToggle';
-import RatingStars from '@/components/RatingStars';
-import { DISSATISFACTION_TAGS } from '@/types/revisit';
-import type { RevisitStatus } from '@/types/revisit';
+import { DISSATISFACTION_TAGS, STAGE_TEXT_MAP } from '@/types/revisit';
+import type { RevisitStage, RevisitStatus } from '@/types/revisit';
 
 const RecordsPage: React.FC = () => {
-  const { elderlyMode, voiceMode, getRecordsList, speakText, revisitList, resetAllData } = useRevisitStore();
-  const [filter, setFilter] = useState<'all' | RevisitStatus>('all');
+  const { elderlyMode, voiceMode, getRecordsList, getClosedList, speakText, revisitList, resetAllData } = useRevisitStore();
+  const [filter, setFilter] = useState<'all' | RevisitStage | 'closed_good' | 'closed_bad'>('all');
 
   useDidShow(() => {
     console.log('[RecordsPage] page show');
   });
 
   const allRecords = useMemo(() => getRecordsList(), [revisitList]);
+  const closedList = useMemo(() => getClosedList(), [revisitList]);
 
   const filteredRecords = useMemo(() => {
     if (filter === 'all') return allRecords;
-    return allRecords.filter(r => r.status === filter);
+    if (filter === 'closed_good') return allRecords.filter(r => r.status === 'closed_good');
+    if (filter === 'closed_bad') return allRecords.filter(r => r.status === 'closed_bad');
+    return allRecords.filter(r => r.stage === filter);
   }, [allRecords, filter]);
 
   const summary = useMemo(() => ({
     total: allRecords.length,
-    resolved: allRecords.filter(r => r.status === 'resolved').length,
-    reviewed: allRecords.filter(r => r.reviewRating).length
-  }), [allRecords]);
+    closedGood: closedList.filter(r => r.status === 'closed_good').length,
+    closedBad: closedList.filter(r => r.status === 'closed_bad').length,
+    inProgress: allRecords.filter(r => r.stage !== 'stage_closed').length
+  }), [allRecords, closedList]);
 
-  const statusConfig: Record<string, { className: string; textClass: string }> = {
-    pending: { className: styles.statusPending, textClass: styles.statusTextPending },
-    resolved: { className: styles.statusResolved, textClass: styles.statusTextResolved },
-    partial: { className: styles.statusPartial, textClass: styles.statusTextPartial },
-    unresolved: { className: styles.statusUnresolved, textClass: styles.statusTextUnresolved }
-  };
-
-  const statusTextMap: Record<string, string> = {
-    pending: '待确认',
-    resolved: '已解决',
-    partial: '部分解决',
-    unresolved: '仍未解决'
+  const statusClassMap: Record<RevisitStatus, string> = {
+    pending: styles.statusPending,
+    resolved: styles.statusResolved,
+    partial: styles.statusPartial,
+    unresolved: styles.statusUnresolved,
+    rehandling: styles.statusRehandling,
+    closed_good: styles.statusClosedGood,
+    closed_bad: styles.statusClosedBad
   };
 
   const filters = [
     { key: 'all', label: '全部' },
-    { key: 'resolved', label: '已解决' },
-    { key: 'partial', label: '部分解决' },
-    { key: 'unresolved', label: '仍未解决' }
+    { key: 'stage_department', label: '部门整改' },
+    { key: 'stage_supervision', label: '督查督办' },
+    { key: 'stage_review', label: '复核评价' },
+    { key: 'closed_good', label: '已认可办结' },
+    { key: 'closed_bad', label: '未认可办结' }
   ] as const;
 
   const handleCardClick = (id: string, title?: string) => {
@@ -63,17 +64,30 @@ const RecordsPage: React.FC = () => {
     if (voiceMode) {
       const labelMap: Record<string, string> = {
         all: '显示全部回访记录',
-        resolved: '显示已解决的事项',
-        partial: '显示部分解决的事项',
-        unresolved: '显示仍未解决的事项'
+        stage_department: '显示部门整改中的事项',
+        stage_supervision: '显示督查督办中的事项',
+        stage_review: '显示等待复核评价的事项',
+        closed_good: '显示群众认可办结的事项',
+        closed_bad: '显示群众未认可办结的事项'
       };
-      speakText(labelMap[key]);
+      speakText(labelMap[key] || '');
     }
   };
 
   const getTagStyle = (tagValue: string) => {
     const found = DISSATISFACTION_TAGS.find(t => t.value === tagValue);
     return found || { bgColor: '#F5F5F5', textColor: '#424242', label: tagValue };
+  };
+
+  const getStageBadgeClass = (stage: RevisitStage): string => {
+    const stageClassMap: Record<RevisitStage, string> = {
+      stage_pending: styles.stagePending,
+      stage_department: styles.stageDepartment,
+      stage_supervision: styles.stageSupervision,
+      stage_review: styles.stageReview,
+      stage_closed: styles.stageClosed
+    };
+    return stageClassMap[stage] || styles.stagePending;
   };
 
   return (
@@ -91,15 +105,15 @@ const RecordsPage: React.FC = () => {
         <View className={styles.summaryCards}>
           <View className={styles.summaryCard}>
             <Text className={styles.summaryNumber}>{summary.total}</Text>
-            <Text className={classnames(styles.summaryLabel, 'smallText')}>总回访</Text>
+            <Text className={classnames(styles.summaryLabel, 'smallText')}>总记录</Text>
           </View>
           <View className={styles.summaryCard}>
-            <Text className={styles.summaryNumber}>{summary.resolved}</Text>
-            <Text className={classnames(styles.summaryLabel, 'smallText')}>已解决</Text>
+            <Text className={styles.summaryNumber}>{summary.inProgress}</Text>
+            <Text className={classnames(styles.summaryLabel, 'smallText')}>办理中</Text>
           </View>
           <View className={styles.summaryCard}>
-            <Text className={styles.summaryNumber}>{summary.reviewed}</Text>
-            <Text className={classnames(styles.summaryLabel, 'smallText')}>已评价</Text>
+            <Text className={styles.summaryNumber}>{summary.closedGood}</Text>
+            <Text className={classnames(styles.summaryLabel, 'smallText')}>已认可</Text>
           </View>
         </View>
       </View>
@@ -130,26 +144,36 @@ const RecordsPage: React.FC = () => {
           </View>
         ) : (
           filteredRecords.map(item => {
-            const cfg = statusConfig[item.status] || statusConfig.pending;
+            const statusClass = statusClassMap[item.status] || statusClassMap.pending;
             return (
               <View
                 key={item.id}
                 className={styles.recordCard}
                 onClick={() => handleCardClick(item.id, item.title)}
               >
-                <View className={styles.recordHeader}>
-                  <Text className={classnames(styles.recordTitle, 'cardTitle')}>{item.title}</Text>
-                  <View className={classnames(styles.statusBadge, cfg.className)}>
-                    <Text className={classnames(styles.statusText, cfg.textClass, 'smallText')}>
-                      {statusTextMap[item.status]}
-                    </Text>
+                <View className={styles.cardHeader}>
+                  <View className={styles.titleRow}>
+                    <Text className={classnames(styles.recordTitle, 'cardTitle')}>{item.title}</Text>
+                    <View className={classnames(styles.statusBadge, statusClass)}>
+                      <Text className={styles.statusText}>{item.statusText}</Text>
+                    </View>
                   </View>
+                  <Text className={classnames(styles.recordMatter, 'smallText')}>{item.matterName}</Text>
+                  {item.stageText && (
+                    <View className={styles.stageRow}>
+                      <View className={classnames(styles.stageBadge, getStageBadgeClass(item.stage))}>
+                        <Text className={styles.stageBadgeText}>📍 {item.stageText}</Text>
+                      </View>
+                      {item.currentHandlerDept && (
+                        <Text className={styles.handlerText}> · {item.currentHandlerDept}</Text>
+                      )}
+                    </View>
+                  )}
                 </View>
-                <Text className={classnames(styles.recordMatter, 'smallText')}>{item.matterName}</Text>
 
                 {item.dissatisfactionTags.length > 0 && (
                   <View className={styles.tagList}>
-                    {item.dissatisfactionTags.slice(0, 4).map(tag => {
+                    {item.dissatisfactionTags.slice(0, 3).map(tag => {
                       const st = getTagStyle(tag);
                       return (
                         <View
@@ -163,32 +187,40 @@ const RecordsPage: React.FC = () => {
                         </View>
                       );
                     })}
-                    {item.dissatisfactionTags.length > 4 && (
+                    {item.dissatisfactionTags.length > 3 && (
                       <View className={styles.tagPill} style={{ background: '#F5F5F5' }}>
                         <Text className={styles.tagPillText} style={{ color: '#757575' }}>
-                          +{item.dissatisfactionTags.length - 4}
+                          +{item.dissatisfactionTags.length - 3}
                         </Text>
                       </View>
                     )}
                   </View>
                 )}
 
-                {item.reviewRating && (
-                  <View className={styles.recordRating}>
-                    <RatingStars value={item.reviewRating} readonly size="sm" showText={false} />
-                    {item.reviewIsImproved !== undefined && (
-                      <Text className={classnames(
-                        styles.reviewConclusion,
-                        item.reviewIsImproved ? styles.conclusionGood : styles.conclusionBad,
-                        'smallText'
-                      )}>
-                        {item.reviewIsImproved ? '✓ 群众认可改善' : '✕ 尚未真正改善'}
-                      </Text>
-                    )}
+                {(item.improvement || item.reimprovement) && (
+                  <View className={styles.improvementSection}>
+                    <Text className={classnames(styles.improvementTitle, 'normalText')}>
+                      {item.reimprovement ? '二次整改方案' : '改善结论'}
+                    </Text>
+                    <Text className={classnames(styles.improvementDesc, 'smallText')}>
+                      {(item.reimprovement || item.improvement)?.description}
+                    </Text>
                   </View>
                 )}
 
-                <View className={styles.recordMeta}>
+                {item.reviewIsImproved !== undefined && item.stage === 'stage_closed' && (
+                  <View className={styles.conclusionRow}>
+                    <Text className={classnames(
+                      styles.conclusionText,
+                      item.reviewIsImproved ? styles.conclusionGood : styles.conclusionBad,
+                      'smallText'
+                    )}>
+                      {item.reviewIsImproved ? '✓ 群众认可改善' : '✕ 尚未真正改善'}
+                    </Text>
+                  </View>
+                )}
+
+                <View className={styles.cardFooter}>
                   <Text className={classnames(styles.metaItem, 'smallText')}>{item.department}</Text>
                   <Text className={classnames(styles.metaItem, 'smallText')}>{item.createTime}</Text>
                 </View>

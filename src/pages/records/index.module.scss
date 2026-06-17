@@ -103,14 +103,19 @@
 
   &:active {
     transform: scale(0.99);
+    box-shadow: 0 1rpx 6rpx rgba(0, 0, 0, 0.06);
   }
 }
 
-.recordHeader {
+.cardHeader {
+  margin-bottom: $spacing-md;
+}
+
+.titleRow {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-xs;
 }
 
 .recordTitle {
@@ -124,52 +129,79 @@
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  padding: 6rpx 16rpx;
+  padding: 8rpx 20rpx;
   border-radius: $radius-round;
-  margin-left: $spacing-sm;
   flex-shrink: 0;
+  margin-left: $spacing-sm;
 }
 
 .statusPending { background: rgba(140, 140, 140, 0.1); }
 .statusResolved { background: rgba(0, 168, 112, 0.1); }
 .statusPartial { background: rgba(245, 166, 35, 0.1); }
 .statusUnresolved { background: rgba(229, 72, 77, 0.1); }
-
-.statusTextPending { color: #8C8C8C; }
-.statusTextResolved { color: $color-resolved; }
-.statusTextPartial { color: $color-partial; }
-.statusTextUnresolved { color: $color-unresolved; }
+.statusRehandling { background: rgba(245, 166, 35, 0.15); }
+.statusClosedGood { background: rgba(0, 168, 112, 0.15); }
+.statusClosedBad { background: rgba(106, 27, 154, 0.12); }
 
 .statusText {
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
 }
 
+.statusPending .statusText { color: $color-pending; }
+.statusResolved .statusText { color: $color-resolved; }
+.statusPartial .statusText { color: $color-partial; }
+.statusUnresolved .statusText { color: $color-unresolved; }
+.statusRehandling .statusText { color: #E65100; }
+.statusClosedGood .statusText { color: $color-success; }
+.statusClosedBad .statusText { color: #6A1B9A; }
+
 .recordMatter {
-  font-size: $font-size-sm;
   color: $color-text-secondary;
-  margin-bottom: $spacing-sm;
-  display: block;
+  font-size: $font-size-sm;
 }
 
-.recordMeta {
+.stageRow {
+  margin-top: 8rpx;
   display: flex;
-  justify-content: space-between;
-  padding-top: $spacing-sm;
-  border-top: 1rpx solid $color-divider;
   flex-wrap: wrap;
-  gap: $spacing-xs;
+  align-items: center;
+  gap: 4rpx;
 }
 
-.metaItem {
+.stageBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+}
+
+.stagePending { background: rgba(140, 140, 140, 0.08); }
+.stageDepartment { background: rgba(29, 111, 224, 0.08); }
+.stageSupervision { background: rgba(245, 166, 35, 0.1); }
+.stageReview { background: rgba(156, 39, 176, 0.08); }
+.stageClosed { background: rgba(0, 168, 112, 0.1); }
+
+.stageBadgeText {
   font-size: $font-size-xs;
-  color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+}
+
+.stagePending .stageBadgeText { color: #8C8C8C; }
+.stageDepartment .stageBadgeText { color: $color-primary; }
+.stageSupervision .stageBadgeText { color: #E65100; }
+.stageReview .stageBadgeText { color: #7B1FA2; }
+.stageClosed .stageBadgeText { color: $color-success; }
+
+.handlerText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
 }
 
 .tagList {
   display: flex;
   flex-wrap: wrap;
-  gap: 8rpx;
+  gap: 12rpx;
   margin-bottom: $spacing-sm;
 }
 
@@ -179,27 +211,38 @@
 }
 
 .tagPillText {
-  font-size: 20rpx;
+  font-size: $font-size-xs;
   font-weight: $font-weight-medium;
 }
 
-.recordRating {
+.improvementSection {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(29, 111, 224, 0.05) 0%, rgba(74, 144, 255, 0.05) 100%);
+  border-radius: $radius-md;
+  border: 1rpx solid rgba(29, 111, 224, 0.15);
+}
+
+.improvementTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.improvementDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.conclusionRow {
   margin-top: $spacing-sm;
   padding-top: $spacing-sm;
   border-top: 1rpx solid $color-divider;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-sm;
-  flex-wrap: wrap;
 }
 
-.ratingLabel {
-  font-size: $font-size-xs;
-  color: $color-text-tertiary;
-}
-
-.reviewConclusion {
+.conclusionText {
   font-weight: $font-weight-medium;
 }
 
@@ -209,6 +252,21 @@
 
 .conclusionBad {
   color: $color-error;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.metaItem {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
 }
 
 .emptyState {

@@ -130,6 +130,56 @@
   color: #6A1B9A;
 }
 
+.supervisionStatus {
+  padding: $spacing-sm $spacing-md;
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.08) 0%, rgba(156, 39, 176, 0.04) 100%);
+  border-radius: 0 0 $radius-md $radius-md;
+  margin-top: -$spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.supervisionStatusText {
+  font-size: $font-size-xs;
+  color: #6A1B9A;
+  font-weight: $font-weight-medium;
+}
+
+.rehandlingStatus {
+  padding: $spacing-sm $spacing-md;
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+  border-radius: 0 0 $radius-md $radius-md;
+  margin-top: -$spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.rehandlingStatusText {
+  font-size: $font-size-xs;
+  color: #E65100;
+  font-weight: $font-weight-medium;
+}
+
+.supervisionRemindCard {
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.08) 0%, rgba(156, 39, 176, 0.03) 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border-left: 6rpx solid #6A1B9A;
+}
+
+.supervisionRemindTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: #6A1B9A;
+  margin-bottom: 4rpx;
+  display: block;
+}
+
+.supervisionRemindDesc {
+  font-size: $font-size-xs;
+  color: #7B1FA2;
+  line-height: 1.5;
+}
+
 .countdown {
   display: inline-flex;
   align-items: center;

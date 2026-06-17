@@ -31,8 +31,8 @@ const PendingPage: React.FC = () => {
 
   const stats = useMemo(() => ({
     pending: pendingList.length,
-    inProgress: revisitList.filter(i => i.status === 'partial' || i.status === 'unresolved').length,
-    resolved: revisitList.filter(i => i.status === 'resolved').length
+    inProgress: revisitList.filter(i => i.stage === 'stage_department' || i.stage === 'stage_supervision').length,
+    resolved: revisitList.filter(i => i.stage === 'stage_closed' || i.stage === 'stage_review').length
   }), [revisitList, pendingList]);
 
   const toggleExpand = (id: string) => {

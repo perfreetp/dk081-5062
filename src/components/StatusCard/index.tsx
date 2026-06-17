@@ -13,13 +13,6 @@ interface StatusCardProps {
   onClick?: (id: string) => void;
 }
 
-const statusConfig: Record<RevisitStatus, { label: string; className: string; dotClass: string }> = {
-  pending: { label: '待确认', className: styles.statusPending, dotClass: styles.dotPending },
-  resolved: { label: '已解决', className: styles.statusResolved, dotClass: styles.dotResolved },
-  partial: { label: '部分解决', className: styles.statusPartial, dotClass: styles.dotPartial },
-  unresolved: { label: '仍未解决', className: styles.statusUnresolved, dotClass: styles.dotUnresolved }
-};
-
 const StatusCard: React.FC<StatusCardProps> = ({
   item,
   showActions = false,
@@ -27,8 +20,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
   onSupplement,
   onClick
 }) => {
-  const status = statusConfig[item.status];
-
   const handleCardClick = () => {
     if (onClick) {
       onClick(item.id);
@@ -37,18 +28,64 @@ const StatusCard: React.FC<StatusCardProps> = ({
     }
   };
 
+  const statusClassMap: Record<RevisitStatus, string> = {
+    pending: styles.statusPending,
+    resolved: styles.statusResolved,
+    partial: styles.statusPartial,
+    unresolved: styles.statusUnresolved,
+    rehandling: styles.statusRehandling,
+    closed_good: styles.statusClosedGood,
+    closed_bad: styles.statusClosedBad
+  };
+
   return (
     <View className={styles.card} onClick={handleCardClick}>
       <View className={styles.cardHeader}>
         <View className={styles.titleRow}>
           <Text className={classnames(styles.title, 'cardTitle')}>{item.title}</Text>
-          <View className={classnames(styles.statusBadge, status.className)}>
-            <View className={classnames(styles.statusDot, status.dotClass)} />
-            <Text className={styles.statusText}>{status.label}</Text>
+          <View className={classnames(styles.statusBadge, statusClassMap[item.status] || styles.statusPending)}>
+            <Text className={styles.statusText}>{item.statusText}</Text>
           </View>
         </View>
         <Text className={classnames(styles.matterName, 'smallText')}>{item.matterName}</Text>
+        {item.stageText && (
+          <View className={styles.stageRow}>
+            <Text className={styles.stageText}>📍 {item.stageText}</Text>
+            {item.currentHandlerDept && (
+              <Text className={styles.handlerText}> · {item.currentHandlerDept}</Text>
+            )}
+          </View>
+        )}
       </View>
+
+      {item.dissatisfactionTags.length > 0 && (
+        <View className={styles.tagRow}>
+          {item.dissatisfactionTags.slice(0, 3).map(tag => {
+            const tagColorMap: Record<string, { bg: string; color: string }> = {
+              wait_long: { bg: '#FFF3E0', color: '#E65100' },
+              unclear_info: { bg: '#E3F2FD', color: '#0D47A1' },
+              repeated_materials: { bg: '#FCE4EC', color: '#B71C1C' },
+              bad_attitude: { bg: '#F3E5F5', color: '#6A1B9A' },
+              other: { bg: '#F5F5F5', color: '#424242' }
+            };
+            const labelMap: Record<string, string> = {
+              wait_long: '等待久',
+              unclear_info: '告知不清',
+              repeated_materials: '材料补交',
+              bad_attitude: '态度生硬',
+              other: '其他'
+            };
+            const c = tagColorMap[tag] || tagColorMap.other;
+            return (
+              <View key={tag} className={styles.tagPill} style={{ background: c.bg }}>
+                <Text className={styles.tagPillText} style={{ color: c.color }}>
+                  {labelMap[tag] || tag}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      )}
 
       <View className={styles.infoRow}>
         <View className={styles.infoItem}>
@@ -67,32 +104,36 @@ const StatusCard: React.FC<StatusCardProps> = ({
         )}
       </View>
 
-      {item.isOvertime && (
-        <View className={styles.overtimeBanner}>
-          <Text className={styles.overtimeText}>⚠ 该事项已超出整改时限，可申请再次督办</Text>
-        </View>
-      )}
-
-      {item.improvement && (
+      {(item.improvement || item.reimprovement) && (
         <View className={styles.improvementSection}>
-          <Text className={classnames(styles.improvementTitle, 'normalText')}>整改说明</Text>
-          <Text className={classnames(styles.improvementDesc, 'smallText')}>
-            {item.improvement.description}
+          <Text className={classnames(styles.improvementTitle, 'normalText')}>
+            {item.reimprovement ? '二次整改方案' : '整改说明'}
           </Text>
-          <View className={styles.improvementMeta}>
-            <Text className={classnames(styles.improvementMetaText, 'smallText')}>
-              承诺完成：{item.improvement.promiseTime}
-            </Text>
-            <Text className={classnames(styles.improvementMetaText, 'smallText')}>
-              负责人：{item.improvement.operator}
-            </Text>
-          </View>
+          <Text className={classnames(styles.improvementDesc, 'smallText')}>
+            {(item.reimprovement || item.improvement)?.description}
+          </Text>
+          {(item.reimprovement || item.improvement)?.promiseTime && (
+            <View className={styles.improvementMeta}>
+              <Text className={classnames(styles.improvementMetaText, 'smallText')}>
+                承诺完成：{(item.reimprovement || item.improvement)!.promiseTime}
+              </Text>
+              {(item.reimprovement || item.improvement)?.operator && (
+                <Text className={classnames(styles.improvementMetaText, 'smallText')}>
+                  负责人：{(item.reimprovement || item.improvement)!.operator}
+                </Text>
+              )}
+            </View>
+          )}
         </View>
       )}
 
       <View className={styles.footer}>
         <Text className={classnames(styles.time, 'smallText')}>发起时间：{item.createTime}</Text>
-        <Text className={classnames(styles.deadline, 'smallText')}>截止：{item.deadline}</Text>
+        {item.nextAction && item.stage !== 'stage_closed' && (
+          <Text className={classnames(styles.nextHint, 'smallText')}>
+            → {item.nextAction}
+          </Text>
+        )}
       </View>
 
       {showActions && item.status === 'pending' && (

@@ -61,6 +61,12 @@
 .statusUnresolved { background: rgba(229, 72, 77, 0.1); }
 .dotUnresolved { background: $color-unresolved; }
 
+.statusRehandling { background: rgba(245, 166, 35, 0.15); }
+
+.statusClosedGood { background: rgba(0, 168, 112, 0.15); }
+
+.statusClosedBad { background: rgba(106, 27, 154, 0.12); }
+
 .statusText {
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
@@ -70,10 +76,49 @@
 .statusResolved .statusText { color: $color-resolved; }
 .statusPartial .statusText { color: $color-partial; }
 .statusUnresolved .statusText { color: $color-unresolved; }
+.statusRehandling .statusText { color: #E65100; }
+.statusClosedGood .statusText { color: $color-success; }
+.statusClosedBad .statusText { color: #6A1B9A; }
 
 .matterName {
   color: $color-text-secondary;
   font-size: $font-size-sm;
+}
+
+.stageRow {
+  margin-top: 8rpx;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.stageText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.handlerText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.tagPill {
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+}
+
+.tagPillText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
 }
 
 .infoRow {
@@ -162,6 +207,12 @@
 .time, .deadline {
   font-size: $font-size-xs;
   color: $color-text-tertiary;
+}
+
+.nextHint {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
 }
 
 .actionSection {
