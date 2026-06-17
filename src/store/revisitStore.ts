@@ -5,7 +5,8 @@ import type {
   RevisitStatus,
   DissatisfactionTag,
   ProcessNode,
-  RevisitStage
+  RevisitStage,
+  ReviewRecord
 } from '@/types/revisit';
 import { mockRevisitList } from '@/data/mockData';
 
@@ -149,6 +150,7 @@ interface RevisitState {
   submitReview: (id: string, data: { rating: number; isImproved: boolean; comment?: string }) => void;
   applySupervision: (id: string) => void;
   requestRehandle: (id: string) => void;
+  submitRehandlingFeedback: (id: string, data: { description: string; promiseTime: string }) => void;
 
   toggleElderlyMode: () => void;
   toggleVoiceMode: () => void;
@@ -167,14 +169,19 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
 
   getPendingList: () => get().revisitList.filter(i => i.stage === 'stage_pending'),
   getProgressList: () => get().revisitList.filter(i =>
-    i.stage === 'stage_department' || i.stage === 'stage_supervision' || i.stage === 'stage_review'
+    i.stage === 'stage_department' || i.stage === 'stage_supervision' ||
+    (i.stage === 'stage_review' && !!i.reviewRating) ||
+    i.status === 'rehandling' || i.status === 'closed_bad'
   ),
   getOvertimeList: () => get()
     .getProgressList()
-    .filter(i => isPromiseOvertime(i) && !i.supervisionApplied && i.stage === 'stage_department'),
+    .filter(i => isPromiseOvertime(i) && !i.supervisionApplied && i.stage === 'stage_department' && i.status !== 'rehandling' && i.status !== 'closed_bad'),
   getRecordsList: () => get().revisitList.filter(i => i.stage !== 'stage_pending'),
-  getReviewList: () => get().revisitList.filter(i => i.stage === 'stage_review' && !i.reviewRating),
-  getClosedList: () => get().revisitList.filter(i => i.stage === 'stage_closed'),
+  getReviewList: () => get().revisitList.filter(i =>
+    (i.stage === 'stage_review' && !i.reviewRating) ||
+    (i.status === 'rehandling' && i.reimprovement?.feedbackTime && !i.reviewIsImproved)
+  ),
+  getClosedList: () => get().revisitList.filter(i => i.status === 'closed_good'),
   getById: (id) => get().revisitList.find(i => i.id === id),
   checkIsOvertime: isPromiseOvertime,
 
@@ -187,9 +194,9 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
         resolved: '已解决',
         partial: '部分解决',
         unresolved: '仍未解决',
-        rehandling: '再次整改中',
+        rehandling: '二次整改中',
         closed_good: '已办结(认可)',
-        closed_bad: '已办结(未认可)'
+        closed_bad: '整改中(未认可)'
       };
 
       const selectedTags = tags ? [...new Set([...item.dissatisfactionTags, ...tags])] : item.dissatisfactionTags;
@@ -330,6 +337,15 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
       });
 
       const newReviewCount = item.reviewCount + 1;
+      const newReviewRecord: ReviewRecord = {
+        id: `review-${Date.now()}`,
+        round: newReviewCount,
+        rating,
+        isImproved,
+        comment,
+        time: nowStr()
+      };
+      const newReviewHistory = [...(item.reviewHistory || []), newReviewRecord];
 
       if (isImproved) {
         newNodes.push({
@@ -347,6 +363,7 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
           reviewIsImproved: true,
           reviewComment: comment,
           reviewCount: newReviewCount,
+          reviewHistory: newReviewHistory,
           status: 'closed_good' as RevisitStatus,
           statusText: '已办结(认可)',
           stage: 'stage_closed' as RevisitStage,
@@ -384,8 +401,9 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
           reviewIsImproved: false,
           reviewComment: comment,
           reviewCount: newReviewCount,
+          reviewHistory: newReviewHistory,
           status: 'rehandling' as RevisitStatus,
-          statusText: '再次整改中',
+          statusText: '二次整改中',
           stage: 'stage_department' as RevisitStage,
           stageText: '部门整改',
           currentHandler: item.improvement?.operator || '相关负责人',
@@ -467,7 +485,7 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
         supervisionApplied: true,
         supervisionLevel: Math.min(nextLevel, 2) as 0 | 1 | 2,
         status: 'rehandling',
-        statusText: '再次整改中',
+        statusText: '二次整改中',
         stage: 'stage_supervision',
         stageText: '督查督办',
         currentHandler: '督查一组',
@@ -485,6 +503,53 @@ export const useRevisitStore = create<RevisitState>((set, get) => ({
     set({ revisitList: newList });
     saveListToStorage(newList);
     console.log('[RevisitStore] applySupervision persisted', { id });
+  },
+
+  submitRehandlingFeedback: (id, { description, promiseTime }) => {
+    const newList = get().revisitList.map(item => {
+      if (item.id !== id) return item;
+
+      const newNodes = finalizeNodesForStage(item.processNodes);
+      newNodes.push({
+        id: `node-${Date.now()}-feedback`,
+        title: '承办单位二次整改反馈',
+        description: `整改说明：${description}；承诺完成时间：${promiseTime}`,
+        time: nowStr(),
+        status: 'done',
+        department: item.department,
+        operator: item.improvement?.operator || '相关负责人',
+        nodeType: 'rehandle_feedback'
+      });
+      newNodes.push({
+        id: `node-${Date.now()}-recheck`,
+        title: '等待群众二次复核',
+        description: '请对二次整改效果进行复核评价',
+        time: '',
+        status: 'current',
+        department: '办事群众',
+        nodeType: 'review_pending'
+      });
+
+      return {
+        ...item,
+        reimprovement: {
+          description,
+          promiseTime,
+          operator: item.improvement?.operator || '相关负责人',
+          feedbackTime: nowStr()
+        },
+        stage: 'stage_review' as RevisitStage,
+        stageText: '复核评价',
+        currentHandler: '您',
+        currentHandlerDept: '办事群众',
+        nextAction: '请对二次整改效果进行复核评价',
+        processNodes: newNodes
+      };
+    });
+
+    set({ revisitList: newList });
+    saveListToStorage(newList);
+    console.log('[RevisitStore] submitRehandlingFeedback persisted', { id, description, promiseTime });
   },
 
   requestRehandle: (id) => {

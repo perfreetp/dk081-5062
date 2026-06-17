@@ -23,6 +23,15 @@ export type DissatisfactionTag =
   | 'bad_attitude'
   | 'other';
 
+export interface ReviewRecord {
+  id: string;
+  round: number;
+  rating: number;
+  isImproved: boolean;
+  comment?: string;
+  time: string;
+}
+
 export interface ProcessNode {
   id: string;
   title: string;
@@ -38,6 +47,7 @@ export interface ProcessNode {
     | 'supervision_accept'
     | 'supervision_handle'
     | 'rehandle_start'
+    | 'rehandle_feedback'
     | 'rehandle_done'
     | 'review_pending'
     | 'review_done'
@@ -76,11 +86,13 @@ export interface RevisitItem {
     description: string;
     promiseTime: string;
     operator: string;
+    feedbackTime?: string;
   };
   reviewCount: number;
   reviewRating?: number;
   reviewComment?: string;
   reviewIsImproved?: boolean;
+  reviewHistory: ReviewRecord[];
   supervisionApplied?: boolean;
   supervisionLevel?: 0 | 1 | 2;
   closed?: boolean;
@@ -114,9 +126,9 @@ export const STATUS_TEXT_MAP: Record<RevisitStatus, string> = {
   resolved: '已解决',
   partial: '部分解决',
   unresolved: '仍未解决',
-  rehandling: '再次整改中',
+  rehandling: '二次整改中',
   closed_good: '已办结(认可)',
-  closed_bad: '已办结(未认可)'
+  closed_bad: '整改中(未认可)'
 };
 
 export const STAGE_TEXT_MAP: Record<RevisitStage, string> = {

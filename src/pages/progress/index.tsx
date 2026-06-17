@@ -33,7 +33,7 @@ const ProgressPage: React.FC = () => {
       case 'supervision':
         return list.filter(i => i.stage === 'stage_supervision');
       case 'rehandling':
-        return list.filter(i => i.status === 'rehandling');
+        return list.filter(i => i.status === 'rehandling' || i.status === 'closed_bad');
       default:
         return list;
     }
@@ -69,7 +69,7 @@ const ProgressPage: React.FC = () => {
     { key: 'all' as const, label: '全部' },
     { key: 'overtime' as const, label: '超时待督办' },
     { key: 'supervision' as const, label: '督办中' },
-    { key: 'rehandling' as const, label: '二次整改' }
+    { key: 'rehandling' as const, label: '整改中/未认可' }
   ];
 
   const handleTabClick = (key: typeof tabs[number]['key']) => {
@@ -79,7 +79,7 @@ const ProgressPage: React.FC = () => {
         all: '显示全部处理中事项',
         overtime: '显示超时待督办事项',
         supervision: '显示督查督办中的事项',
-        rehandling: '显示二次整改中的事项'
+        rehandling: '显示二次整改和未认可的事项'
       };
       speakText(tabLabels[key]);
     }

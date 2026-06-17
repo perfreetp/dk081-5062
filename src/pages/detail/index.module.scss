@@ -662,3 +662,219 @@
 .elderlyMode .bottomBtnTextPrimary {
   font-size: $font-size-lg;
 }
+
+.bottomBtnWarning {
+  background: linear-gradient(135deg, $color-warning 0%, #FFB74D 100%);
+}
+
+.reviewHistoryCount {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-normal;
+  margin-left: 8rpx;
+}
+
+.reviewHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.reviewHistoryItem {
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  opacity: 0.7;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.reviewHistoryItemLatest {
+  background: linear-gradient(135deg, rgba(29, 111, 224, 0.06) 0%, rgba(74, 144, 255, 0.03) 100%);
+  border: 2rpx solid rgba(29, 111, 224, 0.15);
+  opacity: 1;
+}
+
+.reviewHistoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.reviewRoundBadge {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.reviewTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.feedbackModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+}
+
+.feedbackModal {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-xl $radius-xl 0 0;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.feedbackModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg $page-padding;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.feedbackModalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.feedbackModalClose {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+}
+
+.feedbackModalBody {
+  flex: 1;
+  padding: $spacing-lg $page-padding;
+  overflow-y: auto;
+}
+
+.feedbackModalFooter {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  border-top: 1rpx solid $color-divider;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+}
+
+.formLabel {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.formTextarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: $spacing-md;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  background: $color-bg-page;
+  box-sizing: border-box;
+}
+
+.formInput {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 $spacing-md;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  background: $color-bg-page;
+  box-sizing: border-box;
+}
+
+.reminderBox {
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(29, 111, 224, 0.05) 0%, rgba(74, 144, 255, 0.03) 100%);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-primary;
+  margin-top: $spacing-lg;
+}
+
+.reminderText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.feedbackBtn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.feedbackBtnCancel {
+  background: $color-bg-hover;
+}
+
+.feedbackBtnConfirm {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.feedbackBtnText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+}
+
+.feedbackBtnTextPrimary {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}
+
+.elderlyMode .formTextarea {
+  min-height: 240rpx;
+  font-size: $font-size-lg;
+}
+
+.elderlyMode .formInput {
+  height: 112rpx;
+  font-size: $font-size-lg;
+}
+
+.elderlyMode .feedbackBtn {
+  height: 112rpx;
+}
+
+.elderlyMode .feedbackBtnText,
+.elderlyMode .feedbackBtnTextPrimary {
+  font-size: $font-size-lg;
+}

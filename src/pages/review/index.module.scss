@@ -37,6 +37,23 @@
   background: rgba(255, 255, 255, 0.15);
   border-radius: $radius-md;
   text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.statItemPending {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.statItemClosed {
+  background: rgba(0, 168, 112, 0.25);
+}
+
+.statItemRehandling {
+  background: rgba(245, 166, 35, 0.25);
 }
 
 .statNum {
@@ -82,6 +99,50 @@
   align-items: flex-start;
 }
 
+.reviewTitleRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.reviewTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.reviewBadge {
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+  margin-bottom: $spacing-xs;
+  flex-shrink: 0;
+}
+
+.reviewBadgePrimary {
+  background: rgba(29, 111, 224, 0.1);
+
+  .reviewBadgeText {
+    color: $color-primary;
+  }
+}
+
+.reviewBadgeSecondary {
+  background: rgba(106, 27, 154, 0.1);
+
+  .reviewBadgeText {
+    color: #6A1B9A;
+  }
+}
+
+.reviewBadgeText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
 .voiceIcon {
   width: 56rpx;
   height: 56rpx;
@@ -98,25 +159,63 @@
   font-size: 28rpx;
 }
 
-.reviewTitle {
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-  margin-bottom: $spacing-xs;
-  display: block;
-}
-
 .reviewMatter {
   font-size: $font-size-sm;
   color: $color-text-secondary;
   display: block;
 }
 
+.lastReviewBox {
+  background: linear-gradient(135deg, rgba(106, 27, 154, 0.06) 0%, rgba(156, 39, 176, 0.04) 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin: $spacing-md 0;
+  border-left: 6rpx solid #6A1B9A;
+}
+
+.lastReviewLabel {
+  font-size: $font-size-xs;
+  color: #6A1B9A;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.lastReviewContent {
+  gap: $spacing-xs;
+  display: flex;
+  flex-direction: column;
+}
+
+.lastReviewRating {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.lastReviewRatingText {
+  color: $color-text-secondary;
+}
+
+.lastReviewResult {
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.lastReviewComment {
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.lastReviewTime {
+  color: $color-text-tertiary;
+}
+
 .improvementBox {
   background: linear-gradient(135deg, rgba(0, 168, 112, 0.08) 0%, rgba(0, 196, 140, 0.05) 100%);
   border-radius: $radius-md;
   padding: $spacing-md;
-  margin-bottom: $spacing-lg;
+  margin: $spacing-md 0;
   border-left: 6rpx solid $color-success;
 }
 
@@ -270,12 +369,87 @@
   color: $color-text-white;
 }
 
+.reviewedSection {
+  margin-top: $spacing-xl;
+}
+
+.tabBar {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xs;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.tabItem {
+  flex: 1;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+  position: relative;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.tabItemActive {
+  background: $color-primary;
+
+  .tabText {
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.tabText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.tabBadge {
+  position: absolute;
+  top: 8rpx;
+  right: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  background: $color-error;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+}
+
+.tabBadgeText {
+  font-size: 20rpx;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
 .reviewedCard {
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-lg;
   margin-bottom: $spacing-md;
   box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.reviewedCardRehandling {
+  border-left: 6rpx solid $color-warning;
+}
+
+.reviewedCardClosed {
+  border-left: 6rpx solid $color-success;
 }
 
 .reviewedHeader {
@@ -295,7 +469,6 @@
 
 .reviewedBadge {
   padding: 8rpx 20rpx;
-  background: rgba(0, 168, 112, 0.1);
   border-radius: $radius-round;
   margin-left: $spacing-sm;
 }
@@ -303,27 +476,33 @@
 .reviewedBadgeText {
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
-  color: $color-success;
 }
 
-.reviewedRating {
+.reviewedBadgeRehandling {
+  background: rgba(245, 166, 35, 0.12);
+
+  .reviewedBadgeText {
+    color: $color-warning;
+  }
+}
+
+.reviewedBadgeClosed {
+  background: rgba(0, 168, 112, 0.12);
+
+  .reviewedBadgeText {
+    color: $color-success;
+  }
+}
+
+.reviewedRatingRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
   margin-bottom: $spacing-sm;
 }
 
-.reviewedBadgeGood {
-  background: rgba(0, 168, 112, 0.12);
-}
-
-.reviewedBadgeGood .reviewedBadgeText {
-  color: $color-success;
-}
-
-.reviewedBadgeBad {
-  background: rgba(229, 72, 77, 0.12);
-}
-
-.reviewedBadgeBad .reviewedBadgeText {
-  color: $color-error;
+.reviewedRatingText {
+  color: $color-text-secondary;
 }
 
 .reviewedImproved {
@@ -339,6 +518,10 @@
   color: $color-success;
 }
 
+.textWarning {
+  color: $color-warning;
+}
+
 .textBad {
   color: $color-error;
 }
@@ -349,10 +532,6 @@
   line-height: $line-height-normal;
   padding-top: $spacing-sm;
   border-top: 1rpx solid $color-divider;
-}
-
-.reviewedCardRehandling {
-  border-left: 6rpx solid $color-warning;
 }
 
 .trackEntry {
@@ -439,25 +618,68 @@
 }
 
 .elderlyMode {
+  .statItem {
+    padding: $spacing-md $spacing-sm;
+  }
+
+  .statNum {
+    font-size: $font-size-xxl;
+  }
+
+  .statLabel {
+    font-size: $font-size-sm;
+  }
+
   .reviewCard {
     padding: $spacing-lg;
+  }
+
+  .reviewTitle {
+    font-size: $font-size-xl;
+  }
+
+  .reviewBadge {
+    padding: 8rpx 20rpx;
+  }
+
+  .reviewBadgeText {
+    font-size: $font-size-sm;
   }
 
   .reviewedCard {
     padding: $spacing-lg;
   }
 
+  .reviewedTitle {
+    font-size: $font-size-lg;
+  }
+
   .confirmOption {
     height: 104rpx;
+  }
+
+  .confirmOptionText {
+    font-size: $font-size-lg;
   }
 
   .submitBtn {
     height: 112rpx;
   }
 
+  .submitBtnText {
+    font-size: $font-size-xl;
+  }
+
   .commentInput {
     min-height: 200rpx;
     padding: $spacing-md;
+    font-size: $font-size-lg;
+  }
+
+  .ratingLabel,
+  .confirmQuestion,
+  .commentLabel {
+    font-size: $font-size-lg;
   }
 
   .voiceIcon {
@@ -475,5 +697,40 @@
 
   .trackEntryIcon {
     font-size: 48rpx;
+  }
+
+  .trackEntryTitle {
+    font-size: $font-size-lg;
+  }
+
+  .trackEntryDesc {
+    font-size: $font-size-md;
+  }
+
+  .tabItem {
+    height: 96rpx;
+  }
+
+  .tabText {
+    font-size: $font-size-lg;
+  }
+
+  .lastReviewBox {
+    padding: $spacing-md $spacing-lg;
+  }
+
+  .improvementBox {
+    padding: $spacing-md $spacing-lg;
+  }
+
+  .improvementText,
+  .lastReviewResult,
+  .lastReviewComment {
+    font-size: $font-size-md;
+  }
+
+  .improvementLabel,
+  .lastReviewLabel {
+    font-size: $font-size-sm;
   }
 }

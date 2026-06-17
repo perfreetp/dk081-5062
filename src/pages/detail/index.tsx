@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, Image, ScrollView } from '@tarojs/components';
+import React, { useMemo, useState } from 'react';
+import { View, Text, Image, ScrollView, Textarea, Input } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
@@ -19,8 +19,12 @@ const DetailPage: React.FC = () => {
     checkIsOvertime,
     speakText,
     speakItemDetails,
-    applySupervision
+    applySupervision,
+    submitRehandlingFeedback
   } = useRevisitStore();
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [feedbackDesc, setFeedbackDesc] = useState('');
+  const [feedbackPromise, setFeedbackPromise] = useState('');
   const item = getById(id);
 
   const currentStageIndex = useMemo(() => {
@@ -327,48 +331,97 @@ const DetailPage: React.FC = () => {
           </View>
         )}
 
-        {item.reviewRating !== undefined && (
+        {(item.reviewRating !== undefined || (item.reviewHistory && item.reviewHistory.length > 0)) && (
           <View className={styles.card}>
-            <Text className={classnames(styles.cardTitle, 'normalText')}>复核评价</Text>
-            <View className={styles.reviewBox}>
-              <View className={styles.reviewHeader}>
-                <Text className={styles.reviewLabel}>您的评价</Text>
-                <Text className={styles.reviewCountBadge}>第 {item.reviewCount} 次评价</Text>
-              </View>
-              <View className={styles.reviewRatingRow}>
-                <RatingStars value={item.reviewRating} readonly size="lg" />
-              </View>
-              <View className={classnames(
-                styles.improvementConclusion,
-                item.reviewIsImproved ? styles.conclusionGood : styles.conclusionBad
-              )}>
-                <Text className={styles.conclusionIcon}>
-                  {item.reviewIsImproved ? '✓' : '✕'}
-                </Text>
-                <Text className={styles.conclusionText}>
-                  {item.reviewIsImproved
-                    ? '群众认可：整改后问题已真正改善'
-                    : '群众未认可：整改后问题尚未真正改善'}
-                </Text>
-              </View>
-              {item.reviewComment && (
-                <Text
-                  className={styles.reviewText}
-                  onClick={() => {
-                    if (voiceMode) speakText(`评价内容：${item.reviewComment}`);
-                  }}
-                >
-                  "{item.reviewComment}"
-                </Text>
+            <Text className={classnames(styles.cardTitle, 'normalText')}>
+              复核评价记录
+              {item.reviewHistory && item.reviewHistory.length > 0 && (
+                <Text className={styles.reviewHistoryCount}>（共 {item.reviewHistory.length} 次）</Text>
               )}
-              {item.reviewIsImproved === false && item.stage !== 'stage_closed' && (
-                <View className={styles.reviewTrackHint}>
-                  <Text className={styles.reviewTrackText}>
-                    🔄 已重新进入整改流程，承办单位将进行二次整改
+            </Text>
+
+            {item.reviewHistory && item.reviewHistory.length > 0 && (
+              <View className={styles.reviewHistoryList}>
+                {item.reviewHistory.map((record, idx) => (
+                  <View
+                    key={record.id}
+                    className={classnames(
+                      styles.reviewHistoryItem,
+                      idx === item.reviewHistory!.length - 1 && styles.reviewHistoryItemLatest
+                    )}
+                    onClick={() => {
+                      if (voiceMode) {
+                        speakText(`第${record.round}次评价：${record.rating}星，${record.isImproved ? '认可' : '未认可'}。${record.comment || ''}`);
+                      }
+                    }}
+                  >
+                    <View className={styles.reviewHistoryHeader}>
+                      <Text className={styles.reviewRoundBadge}>
+                        {idx === item.reviewHistory!.length - 1 ? '★ ' : ''}第 {record.round} 次评价
+                      </Text>
+                      <Text className={styles.reviewTime}>{record.time}</Text>
+                    </View>
+                    <View className={styles.reviewRatingRow}>
+                      <RatingStars value={record.rating} readonly size="md" />
+                    </View>
+                    <View className={classnames(
+                      styles.improvementConclusion,
+                      record.isImproved ? styles.conclusionGood : styles.conclusionBad
+                    )}>
+                      <Text className={styles.conclusionIcon}>
+                        {record.isImproved ? '✓' : '✕'}
+                      </Text>
+                      <Text className={styles.conclusionText}>
+                        {record.isImproved ? '群众认可：问题已真正改善' : '群众未认可：问题尚未真正改善'}
+                      </Text>
+                    </View>
+                    {record.comment && (
+                      <Text className={styles.reviewText}>
+                        "{record.comment}"
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {!item.reviewHistory || item.reviewHistory.length === 0 ? (
+              <View className={styles.reviewBox}>
+                <View className={styles.reviewHeader}>
+                  <Text className={styles.reviewLabel}>您的评价</Text>
+                  <Text className={styles.reviewCountBadge}>第 {item.reviewCount} 次评价</Text>
+                </View>
+                <View className={styles.reviewRatingRow}>
+                  <RatingStars value={item.reviewRating!} readonly size="lg" />
+                </View>
+                <View className={classnames(
+                  styles.improvementConclusion,
+                  item.reviewIsImproved ? styles.conclusionGood : styles.conclusionBad
+                )}>
+                  <Text className={styles.conclusionIcon}>
+                    {item.reviewIsImproved ? '✓' : '✕'}
+                  </Text>
+                  <Text className={styles.conclusionText}>
+                    {item.reviewIsImproved
+                      ? '群众认可：整改后问题已真正改善'
+                      : '群众未认可：整改后问题尚未真正改善'}
                   </Text>
                 </View>
-              )}
-            </View>
+                {item.reviewComment && (
+                  <Text className={styles.reviewText}>
+                    "{item.reviewComment}"
+                  </Text>
+                )}
+              </View>
+            ) : null}
+
+            {item.reviewIsImproved === false && item.stage !== 'stage_closed' && (
+              <View className={styles.reviewTrackHint}>
+                <Text className={styles.reviewTrackText}>
+                  🔄 已重新进入整改流程，承办单位将进行二次整改
+                </Text>
+              </View>
+            )}
           </View>
         )}
 
@@ -442,10 +495,56 @@ const DetailPage: React.FC = () => {
 
       {item.stage === 'stage_supervision' && (
         <View className={styles.bottomBar}>
+          {!item.reimprovement?.feedbackTime ? (
+            <>
+              <View
+                className={classnames(styles.bottomBtn, styles.bottomBtnSecondary)}
+                onClick={() => {
+                  setShowFeedbackForm(true);
+                  setFeedbackDesc(item.reimprovement?.description || '已成立专项整改小组，对群众反映的问题逐项梳理，制定针对性整改措施。');
+                  setFeedbackPromise('2026-06-25 18:00:00');
+                  if (voiceMode) speakText('点击提交反馈，模拟承办单位提交二次整改方案');
+                }}
+              >
+                <Text className={styles.bottomBtnText}>提交整改反馈</Text>
+              </View>
+              <View
+                className={classnames(styles.bottomBtn, styles.bottomBtnSupervision)}
+              >
+                <Text className={styles.bottomBtnTextPrimary}>督查督办中</Text>
+              </View>
+            </>
+          ) : (
+            <View
+              className={classnames(styles.bottomBtn, styles.bottomBtnPrimary)}
+              onClick={() => {
+                Taro.switchTab({ url: '/pages/review/index' });
+                if (voiceMode) speakText('前往结果评价页面，进行二次复核');
+              }}
+            >
+              <Text className={styles.bottomBtnTextPrimary}>去二次复核</Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {item.status === 'rehandling' && item.stage === 'stage_department' && !item.reimprovement?.feedbackTime && (
+        <View className={styles.bottomBar}>
           <View
-            className={classnames(styles.bottomBtn, styles.bottomBtnSupervision)}
+            className={classnames(styles.bottomBtn, styles.bottomBtnSecondary)}
+            onClick={() => {
+              setShowFeedbackForm(true);
+              setFeedbackDesc(item.reimprovement?.description || '已针对群众不满意的问题，制定了更深入的整改方案，加强人员培训，优化服务流程。');
+              setFeedbackPromise('2026-06-25 18:00:00');
+              if (voiceMode) speakText('点击提交反馈，模拟承办单位提交二次整改方案');
+            }}
           >
-            <Text className={styles.bottomBtnTextPrimary}>督查部门督办中</Text>
+            <Text className={styles.bottomBtnText}>提交整改反馈</Text>
+          </View>
+          <View
+            className={classnames(styles.bottomBtn, styles.bottomBtnWarning)}
+          >
+            <Text className={styles.bottomBtnTextPrimary}>二次整改中</Text>
           </View>
         </View>
       )}
@@ -458,6 +557,83 @@ const DetailPage: React.FC = () => {
             <Text className={styles.bottomBtnTextPrimary}>
               {item.status === 'closed_good' ? '✓ 已办结（群众认可）' : '✕ 已办结（未认可）'}
             </Text>
+          </View>
+        </View>
+      )}
+
+      {showFeedbackForm && (
+        <View className={styles.feedbackModalOverlay}>
+          <View className={styles.feedbackModal}>
+            <View className={styles.feedbackModalHeader}>
+              <Text className={styles.feedbackModalTitle}>模拟：承办单位提交二次整改反馈</Text>
+              <View
+                className={styles.feedbackModalClose}
+                onClick={() => setShowFeedbackForm(false)}
+              >
+                <Text>✕</Text>
+              </View>
+            </View>
+
+            <ScrollView scrollY className={styles.feedbackModalBody}>
+              <View className={styles.formItem}>
+                <Text className={styles.formLabel}>整改说明</Text>
+                <Textarea
+                  className={styles.formTextarea}
+                  value={feedbackDesc}
+                  onInput={(e) => setFeedbackDesc(e.detail.value)}
+                  placeholder="请输入整改说明..."
+                  maxlength={500}
+                />
+              </View>
+
+              <View className={styles.formItem}>
+                <Text className={styles.formLabel}>承诺完成时间</Text>
+                <Input
+                  className={styles.formInput}
+                  value={feedbackPromise}
+                  onInput={(e) => setFeedbackPromise(e.detail.value)}
+                  placeholder="例：2026-06-25 18:00:00"
+                />
+              </View>
+
+              <View className={styles.reminderBox}>
+                <Text className={styles.reminderText}>
+                  💡 这是一个模拟功能，用于演示承办单位提交二次整改反馈后的完整流程。
+                  提交后状态将从"督办中/整改中"推进到"等待群众复核"，群众可以在结果评价页再次评价。
+                </Text>
+              </View>
+            </ScrollView>
+
+            <View className={styles.feedbackModalFooter}>
+              <View
+                className={classnames(styles.feedbackBtn, styles.feedbackBtnCancel)}
+                onClick={() => setShowFeedbackForm(false)}
+              >
+                <Text className={styles.feedbackBtnText}>取消</Text>
+              </View>
+              <View
+                className={classnames(styles.feedbackBtn, styles.feedbackBtnConfirm)}
+                onClick={() => {
+                  if (!feedbackDesc.trim()) {
+                    Taro.showToast({ title: '请输入整改说明', icon: 'none' });
+                    return;
+                  }
+                  if (!feedbackPromise.trim()) {
+                    Taro.showToast({ title: '请输入承诺完成时间', icon: 'none' });
+                    return;
+                  }
+                  submitRehandlingFeedback(item.id, {
+                    description: feedbackDesc,
+                    promiseTime: feedbackPromise
+                  });
+                  setShowFeedbackForm(false);
+                  Taro.showToast({ title: '整改反馈已提交', icon: 'success' });
+                  if (voiceMode) speakText('二次整改反馈已提交，现已进入等待群众复核阶段');
+                }}
+              >
+                <Text className={styles.feedbackBtnTextPrimary}>确认提交</Text>
+              </View>
+            </View>
           </View>
         </View>
       )}

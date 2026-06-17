@@ -5,33 +5,46 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useRevisitStore } from '@/store/revisitStore';
 import ElderlyToggle from '@/components/ElderlyToggle';
-import { DISSATISFACTION_TAGS, STAGE_TEXT_MAP } from '@/types/revisit';
-import type { RevisitStage, RevisitStatus } from '@/types/revisit';
+import { DISSATISFACTION_TAGS } from '@/types/revisit';
+import type { RevisitStage, RevisitStatus, RevisitItem } from '@/types/revisit';
+
+type TabType = 'inProgress' | 'closed';
+type StageFilterType = 'all' | 'stage_department' | 'stage_supervision' | 'stage_review';
 
 const RecordsPage: React.FC = () => {
   const { elderlyMode, voiceMode, getRecordsList, getClosedList, speakText, revisitList, resetAllData } = useRevisitStore();
-  const [filter, setFilter] = useState<'all' | RevisitStage | 'closed_good' | 'closed_bad'>('all');
+  const [activeTab, setActiveTab] = useState<TabType>('inProgress');
+  const [stageFilter, setStageFilter] = useState<StageFilterType>('all');
 
   useDidShow(() => {
     console.log('[RecordsPage] page show');
   });
 
-  const allRecords = useMemo(() => getRecordsList(), [revisitList]);
-  const closedList = useMemo(() => getClosedList(), [revisitList]);
+  const inProgressList = useMemo(() => {
+    return getRecordsList().filter(r => r.status !== 'closed_good');
+  }, [revisitList]);
 
-  const filteredRecords = useMemo(() => {
-    if (filter === 'all') return allRecords;
-    if (filter === 'closed_good') return allRecords.filter(r => r.status === 'closed_good');
-    if (filter === 'closed_bad') return allRecords.filter(r => r.status === 'closed_bad');
-    return allRecords.filter(r => r.stage === filter);
-  }, [allRecords, filter]);
+  const closedList = useMemo(() => {
+    return getClosedList().sort((a, b) => {
+      if (!a.closedTime) return 1;
+      if (!b.closedTime) return -1;
+      return new Date(b.closedTime.replace(/-/g, '/')).getTime() - new Date(a.closedTime.replace(/-/g, '/')).getTime();
+    });
+  }, [revisitList]);
+
+  const filteredInProgressList = useMemo(() => {
+    if (stageFilter === 'all') return inProgressList;
+    return inProgressList.filter(r => r.stage === stageFilter);
+  }, [inProgressList, stageFilter]);
+
+  const displayList = useMemo(() => {
+    return activeTab === 'inProgress' ? filteredInProgressList : closedList;
+  }, [activeTab, filteredInProgressList, closedList]);
 
   const summary = useMemo(() => ({
-    total: allRecords.length,
-    closedGood: closedList.filter(r => r.status === 'closed_good').length,
-    closedBad: closedList.filter(r => r.status === 'closed_bad').length,
-    inProgress: allRecords.filter(r => r.stage !== 'stage_closed').length
-  }), [allRecords, closedList]);
+    inProgress: inProgressList.length,
+    closed: closedList.length
+  }), [inProgressList, closedList]);
 
   const statusClassMap: Record<RevisitStatus, string> = {
     pending: styles.statusPending,
@@ -43,35 +56,50 @@ const RecordsPage: React.FC = () => {
     closed_bad: styles.statusClosedBad
   };
 
-  const filters = [
-    { key: 'all', label: '全部' },
-    { key: 'stage_department', label: '部门整改' },
-    { key: 'stage_supervision', label: '督查督办' },
-    { key: 'stage_review', label: '复核评价' },
-    { key: 'closed_good', label: '已认可办结' },
-    { key: 'closed_bad', label: '未认可办结' }
-  ] as const;
+  const tabOptions = [
+    { key: 'inProgress' as TabType, label: '办理中', count: summary.inProgress },
+    { key: 'closed' as TabType, label: '已办结', count: summary.closed }
+  ];
 
-  const handleCardClick = (id: string, title?: string) => {
-    if (voiceMode && title) {
-      speakText(`正在查看：${title}`);
+  const stageFilters = [
+    { key: 'all' as StageFilterType, label: '全部' },
+    { key: 'stage_department' as StageFilterType, label: '部门整改' },
+    { key: 'stage_supervision' as StageFilterType, label: '督查督办' },
+    { key: 'stage_review' as StageFilterType, label: '复核评价' }
+  ];
+
+  const handleTabClick = (tab: TabType) => {
+    setActiveTab(tab);
+    if (voiceMode) {
+      const text = tab === 'inProgress' 
+        ? `切换到办理中，共${summary.inProgress}件` 
+        : `切换到已办结，共${summary.closed}件`;
+      speakText(text);
     }
-    Taro.navigateTo({ url: `/pages/detail/index?id=${id}` });
   };
 
-  const handleFilterClick = (key: typeof filters[number]['key']) => {
-    setFilter(key as any);
+  const handleStageFilterClick = (filter: StageFilterType) => {
+    setStageFilter(filter);
     if (voiceMode) {
-      const labelMap: Record<string, string> = {
-        all: '显示全部回访记录',
+      const labelMap: Record<StageFilterType, string> = {
+        all: '显示办理中全部事项',
         stage_department: '显示部门整改中的事项',
         stage_supervision: '显示督查督办中的事项',
-        stage_review: '显示等待复核评价的事项',
-        closed_good: '显示群众认可办结的事项',
-        closed_bad: '显示群众未认可办结的事项'
+        stage_review: '显示等待复核评价的事项'
       };
-      speakText(labelMap[key] || '');
+      speakText(labelMap[filter]);
     }
+  };
+
+  const handleCardClick = (item: RevisitItem) => {
+    if (voiceMode && item.title) {
+      const parts = [item.title, item.statusText];
+      if (item.closedTime) {
+        parts.push(`办结时间${item.closedTime}`);
+      }
+      speakText(`正在查看：${parts.join('，')}`);
+    }
+    Taro.navigateTo({ url: `/pages/detail/index?id=${item.id}` });
   };
 
   const getTagStyle = (tagValue: string) => {
@@ -90,6 +118,16 @@ const RecordsPage: React.FC = () => {
     return stageClassMap[stage] || styles.stagePending;
   };
 
+  const getLatestReview = (item: RevisitItem) => {
+    if (!item.reviewHistory || item.reviewHistory.length === 0) return null;
+    return item.reviewHistory[item.reviewHistory.length - 1];
+  };
+
+  const getRatingText = (rating: number) => {
+    const texts = ['', '非常不满意', '不满意', '一般', '满意', '非常满意'];
+    return texts[rating] || '';
+  };
+
   return (
     <View className={classnames(styles.page, elderlyMode && 'elderlyMode')}>
       <View className={styles.header}>
@@ -102,54 +140,94 @@ const RecordsPage: React.FC = () => {
           </View>
           <ElderlyToggle />
         </View>
+
         <View className={styles.summaryCards}>
-          <View className={styles.summaryCard}>
-            <Text className={styles.summaryNumber}>{summary.total}</Text>
-            <Text className={classnames(styles.summaryLabel, 'smallText')}>总记录</Text>
-          </View>
-          <View className={styles.summaryCard}>
+          <View 
+            className={classnames(styles.summaryCard, activeTab === 'inProgress' && styles.summaryCardActive)}
+            onClick={() => handleTabClick('inProgress')}
+          >
             <Text className={styles.summaryNumber}>{summary.inProgress}</Text>
             <Text className={classnames(styles.summaryLabel, 'smallText')}>办理中</Text>
           </View>
-          <View className={styles.summaryCard}>
-            <Text className={styles.summaryNumber}>{summary.closedGood}</Text>
-            <Text className={classnames(styles.summaryLabel, 'smallText')}>已认可</Text>
+          <View 
+            className={classnames(styles.summaryCard, activeTab === 'closed' && styles.summaryCardActive)}
+            onClick={() => handleTabClick('closed')}
+          >
+            <Text className={styles.summaryNumber}>{summary.closed}</Text>
+            <Text className={classnames(styles.summaryLabel, 'smallText')}>已办结</Text>
           </View>
+        </View>
+
+        <View className={styles.tabRow}>
+          {tabOptions.map(tab => (
+            <View
+              key={tab.key}
+              className={classnames(
+                styles.tabItem,
+                activeTab === tab.key && styles.tabItemActive
+              )}
+              onClick={() => handleTabClick(tab.key)}
+            >
+              <Text className={classnames(styles.tabText, activeTab === tab.key && styles.tabTextActive)}>
+                {tab.label}
+              </Text>
+              <View className={classnames(
+                styles.tabBadge,
+                activeTab === tab.key ? styles.tabBadgeActive : styles.tabBadgeDefault
+              )}>
+                <Text className={classnames(
+                  styles.tabBadgeText,
+                  activeTab === tab.key ? styles.tabBadgeTextActive : styles.tabBadgeTextDefault
+                )}>
+                  {tab.count}
+                </Text>
+              </View>
+            </View>
+          ))}
         </View>
       </View>
 
       <ScrollView scrollY className={styles.content}>
-        <View className={styles.filterRow}>
-          {filters.map(f => (
-            <View
-              key={f.key}
-              className={classnames(
-                styles.filterChip,
-                filter === f.key && styles.filterChipActive
-              )}
-              onClick={() => handleFilterClick(f.key)}
-            >
-              <Text className={classnames(styles.filterChipText, 'smallText')}>{f.label}</Text>
-            </View>
-          ))}
-        </View>
+        {activeTab === 'inProgress' && (
+          <View className={styles.filterRow}>
+            {stageFilters.map(f => (
+              <View
+                key={f.key}
+                className={classnames(
+                  styles.filterChip,
+                  stageFilter === f.key && styles.filterChipActive
+                )}
+                onClick={() => handleStageFilterClick(f.key)}
+              >
+                <Text className={classnames(styles.filterChipText, 'smallText')}>{f.label}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
-        {filteredRecords.length === 0 ? (
+        {displayList.length === 0 ? (
           <View className={styles.emptyState}>
             <Text className={styles.emptyIcon}>📋</Text>
-            <Text className={classnames(styles.emptyTitle, 'cardTitle')}>暂无回访记录</Text>
+            <Text className={classnames(styles.emptyTitle, 'cardTitle')}>
+              {activeTab === 'inProgress' ? '暂无办理中记录' : '暂无已办结记录'}
+            </Text>
             <Text className={classnames(styles.emptyDesc, 'smallText')}>
-              完成的回访会在此处展示，您可以随时查看历史记录
+              {activeTab === 'inProgress' 
+                ? '正在办理的事项会在此处展示' 
+                : '群众认可办结的事项会在此处归档展示'}
             </Text>
           </View>
         ) : (
-          filteredRecords.map(item => {
+          displayList.map(item => {
             const statusClass = statusClassMap[item.status] || statusClassMap.pending;
+            const latestReview = getLatestReview(item);
+            const isClosedGood = item.status === 'closed_good';
+
             return (
               <View
                 key={item.id}
                 className={styles.recordCard}
-                onClick={() => handleCardClick(item.id, item.title)}
+                onClick={() => handleCardClick(item)}
               >
                 <View className={styles.cardHeader}>
                   <View className={styles.titleRow}>
@@ -159,15 +237,29 @@ const RecordsPage: React.FC = () => {
                     </View>
                   </View>
                   <Text className={classnames(styles.recordMatter, 'smallText')}>{item.matterName}</Text>
-                  {item.stageText && (
-                    <View className={styles.stageRow}>
-                      <View className={classnames(styles.stageBadge, getStageBadgeClass(item.stage))}>
-                        <Text className={styles.stageBadgeText}>📍 {item.stageText}</Text>
+                  
+                  {isClosedGood ? (
+                    <View className={styles.closedBadgeRow}>
+                      <View className={styles.closedApprovedBadge}>
+                        <Text className={styles.closedApprovedText}>✓ 已办结·群众认可</Text>
                       </View>
-                      {item.currentHandlerDept && (
-                        <Text className={styles.handlerText}> · {item.currentHandlerDept}</Text>
+                      {item.closedTime && (
+                        <Text className={classnames(styles.closedTime, 'smallText')}>
+                          办结时间：{item.closedTime}
+                        </Text>
                       )}
                     </View>
+                  ) : (
+                    item.stageText && (
+                      <View className={styles.stageRow}>
+                        <View className={classnames(styles.stageBadge, getStageBadgeClass(item.stage))}>
+                          <Text className={styles.stageBadgeText}>📍 {item.stageText}</Text>
+                        </View>
+                        {item.currentHandlerDept && (
+                          <Text className={styles.handlerText}> · {item.currentHandlerDept}</Text>
+                        )}
+                      </View>
+                    )
                   )}
                 </View>
 
@@ -197,25 +289,30 @@ const RecordsPage: React.FC = () => {
                   </View>
                 )}
 
-                {(item.improvement || item.reimprovement) && (
-                  <View className={styles.improvementSection}>
-                    <Text className={classnames(styles.improvementTitle, 'normalText')}>
-                      {item.reimprovement ? '二次整改方案' : '改善结论'}
+                {latestReview && (
+                  <View className={styles.reviewSection}>
+                    <Text className={classnames(styles.reviewTitle, 'normalText')}>
+                      最近评价（第{latestReview.round}次）
                     </Text>
-                    <Text className={classnames(styles.improvementDesc, 'smallText')}>
-                      {(item.reimprovement || item.improvement)?.description}
-                    </Text>
-                  </View>
-                )}
-
-                {item.reviewIsImproved !== undefined && item.stage === 'stage_closed' && (
-                  <View className={styles.conclusionRow}>
-                    <Text className={classnames(
-                      styles.conclusionText,
-                      item.reviewIsImproved ? styles.conclusionGood : styles.conclusionBad,
-                      'smallText'
-                    )}>
-                      {item.reviewIsImproved ? '✓ 群众认可改善' : '✕ 尚未真正改善'}
+                    <View className={styles.reviewContent}>
+                      <Text className={classnames(styles.reviewRating, 'smallText')}>
+                        {'⭐'.repeat(latestReview.rating)} {getRatingText(latestReview.rating)}
+                      </Text>
+                      <Text className={classnames(
+                        styles.reviewConclusion,
+                        latestReview.isImproved ? styles.reviewGood : styles.reviewBad,
+                        'smallText'
+                      )}>
+                        {latestReview.isImproved ? '✓ 认可改善' : '✕ 尚未改善'}
+                      </Text>
+                    </View>
+                    {latestReview.comment && (
+                      <Text className={classnames(styles.reviewComment, 'smallText')}>
+                        "{latestReview.comment}"
+                      </Text>
+                    )}
+                    <Text className={classnames(styles.reviewTime, 'smallText')}>
+                      {latestReview.time}
                     </Text>
                   </View>
                 )}

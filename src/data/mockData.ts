@@ -1,4 +1,4 @@
-import type { RevisitItem, FrequentTip } from '@/types/revisit';
+import type { RevisitItem } from '@/types/revisit';
 
 export const mockRevisitList: RevisitItem[] = [
   {
@@ -21,6 +21,7 @@ export const mockRevisitList: RevisitItem[] = [
     dissatisfactionTags: [],
     reviewCount: 0,
     supervisionLevel: 0,
+    reviewHistory: [],
     processNodes: [
       {
         id: 'node-1',
@@ -61,6 +62,7 @@ export const mockRevisitList: RevisitItem[] = [
     dissatisfactionTags: [],
     reviewCount: 0,
     supervisionLevel: 0,
+    reviewHistory: [],
     processNodes: [
       {
         id: 'node-1',
@@ -103,6 +105,7 @@ export const mockRevisitList: RevisitItem[] = [
     supplementText: '去了三趟才把材料交齐，每次都说的不一样。',
     reviewCount: 0,
     supervisionLevel: 0,
+    reviewHistory: [],
     improvement: {
       description: '已安排专人对接，梳理材料清单，将在下次办理时一次性告知全部所需材料。已对窗口工作人员进行业务培训。',
       promiseTime: '2026-06-15 18:00:00',
@@ -169,6 +172,7 @@ export const mockRevisitList: RevisitItem[] = [
     supplementText: '工作人员态度不好，问了几个问题都不耐烦，而且说的流程和实际办的不一样。',
     reviewCount: 0,
     supervisionLevel: 0,
+    reviewHistory: [],
     improvement: {
       description: '已对涉事工作人员进行批评教育，将安排服务礼仪培训。如需重新办理，可联系专人绿色通道办理。',
       promiseTime: '2026-06-16 18:00:00',
@@ -226,6 +230,7 @@ export const mockRevisitList: RevisitItem[] = [
     dissatisfactionTags: ['wait_long'],
     reviewCount: 0,
     supervisionLevel: 0,
+    reviewHistory: [],
     improvement: {
       description: '已优化叫号系统，增加高峰时段窗口，平均等待时间缩短至15分钟以内。',
       promiseTime: '2026-06-05 18:00:00',
@@ -284,6 +289,7 @@ export const mockRevisitList: RevisitItem[] = [
     reviewIsImproved: true,
     reviewComment: '办理速度很快，工作人员很耐心，非常满意！',
     supervisionLevel: 0,
+    reviewHistory: [{ id: 'review-rv006-1', round: 1, rating: 5, isImproved: true, comment: '办理速度快了很多，非常满意！', time: '2026-05-25 10:00:00' }],
     improvement: {
       description: '已制作办理流程图和材料清单，在大厅和官网同步公示。',
       promiseTime: '2026-05-24 18:00:00',
@@ -352,6 +358,7 @@ export const mockRevisitList: RevisitItem[] = [
     reviewCount: 1,
     supervisionApplied: true,
     supervisionLevel: 1,
+    reviewHistory: [{ id: 'review-rv007-1', round: 1, rating: 2, isImproved: false, comment: '等了一个月了还没到账，根本没改善。', time: '2026-06-11 14:30:00' }],
     improvement: {
       description: '因系统升级导致处理延迟，已加快处理进度。',
       promiseTime: '2026-06-10 18:00:00',
@@ -453,25 +460,30 @@ export const mockRevisitList: RevisitItem[] = [
     createTime: '2026-05-15 09:30:00',
     deadline: '2026-05-20 18:00:00',
     status: 'closed_bad',
-    statusText: '已办结(未认可)',
-    stage: 'stage_closed',
-    stageText: '已办结',
-    currentHandler: '—',
-    currentHandlerDept: '已办结归档',
-    nextAction: '事项已办结，群众对整改效果未完全认可',
+    statusText: '整改中(未认可)',
+    stage: 'stage_department',
+    stageText: '部门整改',
+    currentHandler: '赵科长',
+    currentHandlerDept: '市税务局',
+    nextAction: '等待承办单位二次整改，完成后将再次邀请您复核',
     dissatisfactionTags: ['bad_attitude'],
     reviewCount: 1,
     reviewRating: 2,
     reviewIsImproved: false,
     reviewComment: '态度还是那样，没感觉到有改善。',
     supervisionLevel: 0,
+    reviewHistory: [{ id: 'review-rv008-1', round: 1, rating: 2, isImproved: false, comment: '态度还是那样，没感觉到有改善。', time: '2026-05-20 11:00:00' }],
     improvement: {
       description: '已对窗口工作人员进行服务培训，要求微笑服务。',
       promiseTime: '2026-05-18 18:00:00',
       operator: '赵科长'
     },
-    closed: true,
-    closedTime: '2026-05-22 14:00:00',
+    reimprovement: {
+      description: '针对群众反映的态度问题，正在制定针对性整改方案',
+      promiseTime: '2026-06-20 18:00:00',
+      operator: '赵科长'
+    },
+    closed: false,
     processNodes: [
       {
         id: 'node-1',
@@ -503,12 +515,22 @@ export const mockRevisitList: RevisitItem[] = [
       },
       {
         id: 'node-4',
-        title: '办结归档',
-        description: '群众未认可整改效果，事项仍予办结归档',
-        time: '2026-05-22 14:00:00',
-        status: 'done',
-        department: '市政务服务管理局',
-        nodeType: 'closed'
+        title: '二次整改已启动',
+        description: '群众对整改效果不满意，启动二次整改程序',
+        time: '2026-05-20 11:30:00',
+        status: 'current',
+        department: '市税务局',
+        operator: '赵科长',
+        nodeType: 'rehandle_start'
+      },
+      {
+        id: 'node-5',
+        title: '二次整改完成后复核',
+        description: '二次整改完成后将邀请群众再次复核',
+        time: '',
+        status: 'pending',
+        department: '办事群众',
+        nodeType: 'review_pending'
       }
     ]
   }
